@@ -1,3 +1,9 @@
 .claude/*.local.md
 .worktrees/
 sessions/
+.venv/
+build/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/

@@ -1,0 +1,4 @@
+name = "epm"
+status = "reserved"   # becomes "active" when the product is implemented
+sql = []              # layer SQL files in execution order, relative to this folder
+gates = []            # gate SQL files in execution order, relative to this folder

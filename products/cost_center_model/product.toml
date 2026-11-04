@@ -1,0 +1,4 @@
+name = "cost_center_model"
+status = "reserved"   # becomes "active" when the product is implemented
+sql = []              # layer SQL files in execution order, relative to this folder
+gates = []            # gate SQL files in execution order, relative to this folder
