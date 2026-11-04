@@ -1,0 +1,68 @@
+{
+  "slug": "_scaffold",
+  "tasks": [
+    {
+      "id": "S1",
+      "title": "Create the project structure, pyproject.toml, Makefile and entry point",
+      "layer": "scaffold",
+      "deps": [],
+      "acs": [],
+      "dod": "make setup builds a venv and installs the package; `fdp --help` boots (skeleton smoke test: project builds and boots)",
+      "files_hint": ["pyproject.toml", "Makefile", "src/fdp_core/__init__.py", "src/fdp_core/cli.py", ".gitignore"]
+    },
+    {
+      "id": "S2",
+      "title": "Create the fdp_core skeleton: runner, gate framework, errors, empty DuckDB layer build",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "an empty product builds raw/staging/mart schemas in build/fdp.duckdb and reports zero gates (replaces the migration-tool check: the layer build runs)",
+      "files_hint": ["src/fdp_core/runner.py", "src/fdp_core/gates.py", "src/fdp_core/errors.py", "src/fdp_core/config.py"]
+    },
+    {
+      "id": "S3",
+      "title": "Wire the pytest harness and a boot smoke test",
+      "layer": "scaffold",
+      "deps": ["S2"],
+      "acs": [],
+      "dod": "`pytest` runs green on the empty suite plus one smoke test that boots the CLI; `ruff check .` passes",
+      "files_hint": ["tests/unit/test_smoke.py", "tests/integration/", "pyproject.toml"]
+    },
+    {
+      "id": "S4",
+      "title": "Reserve the four product folders with product.toml and status READMEs",
+      "layer": "scaffold",
+      "deps": ["S2"],
+      "acs": [],
+      "dod": "products/unified_gl, cost_center_model, functional_model, epm each have product.toml, sql/, gates/, data/ and a README stating status; the runner discovers all four manifests",
+      "files_hint": ["products/unified_gl/", "products/cost_center_model/", "products/functional_model/", "products/epm/"]
+    },
+    {
+      "id": "S5",
+      "title": "Reserve the databricks adapter folder with a README (no compatibility claim)",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "databricks/README.md states the path is planned and unverified; the folder does not affect `make run`",
+      "files_hint": ["databricks/README.md"]
+    },
+    {
+      "id": "S6",
+      "title": "Add the CI workflow (setup + lint + test)",
+      "layer": "scaffold",
+      "deps": ["S3"],
+      "acs": [],
+      "dod": "CI config is valid YAML and its commands match make setup, ruff check ., pytest",
+      "files_hint": [".github/workflows/ci.yml"]
+    },
+    {
+      "id": "S7",
+      "title": "Write CLAUDE.md from the chosen conventions",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "CLAUDE.md reflects docs/architecture-map.md: layout, make targets, gate convention (zero rows = PASS), dialect-neutral SQL rule",
+      "files_hint": ["CLAUDE.md"]
+    }
+  ]
+}
