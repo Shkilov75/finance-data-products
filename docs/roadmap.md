@@ -45,7 +45,6 @@ A reviewer can clone the repo, run one command and watch Unified GL turn two ERP
 
 | # | Question | Type | Owner | Blocks |
 |---|---|:---:|:---:|:---:|
-| D1 | Does the owner have access to a Databricks workspace or the free edition, so the adapter can be run for real? | grilling | human | 6 |
 | D2 | How is a Power BI artifact produced and verified from macOS, and can a reviewer open it without Power BI Desktop? | research | agent | 9 |
 
 ## Decisions so far
@@ -56,6 +55,7 @@ A reviewer can clone the repo, run one command and watch Unified GL turn two ERP
 - One dialect-neutral SQL source shared by the local and Databricks paths via a thin adapter → [`ADR-0004`](adr/0004-share-sql-across-local-and-databricks.md)
 - Both execution paths are built, against the interviewer's recommendation of local only; products 2 and 3 are cut first when time runs out → [`idea-brief.md`](idea-brief.md) §6 and §7
 - Power BI becomes its own step (9) instead of being left as an open question → [`idea-brief.md`](idea-brief.md) §8
+- D1 closed: the owner has access to Databricks Free Edition, so the adapter can be run for real at step 6 (decided 2026-11-04) → [`unified-gl-inputs/spec.md`](features/unified-gl-inputs/spec.md) §1 and §6
 
 ## Dependency graph
 
