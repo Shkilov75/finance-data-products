@@ -31,7 +31,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ## 3. Non-goals
 
-- Currency conversion, exchange rates and the two mandated gates (rate exists on date, totals reconcile before and after conversion) — they belong to roadmap step 3; the rates file is assumed to arrive there too (assumption, not yet owner-confirmed).
+- Currency conversion, using the exchange rates, and the two mandated gates (rate exists on date, totals reconcile before and after conversion) — they belong to roadmap step 3; this step only generates the rates file (AC-05) and does not read it.
 - Deliberately corrupted data and the proof that gates fail — roadmap step 4; this step only guarantees that the clean data passes.
 - Running or claiming compatibility on a second execution platform — roadmap step 6 and open decision D1 (access unknown); this step keeps its logic portable but verifies nothing there.
 - Reader documentation, diagrams and sample output — roadmap step 5.
@@ -43,7 +43,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 ### US-01: Generate reproducible exports
 
 **As an** Owner
-**I want** to generate both ERP exports and the account mapping from a fixed seed, at a small readable size
+**I want** to generate both ERP exports, the account mapping and the exchange-rate file from a fixed seed, at a small readable size
 **So that** every checkout has identical input data
 
 ### US-02: See what each source delivered
@@ -112,9 +112,9 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ### AC-05 (US-01) — happy path
 
-**Given** the Owner generates the exports and the account mapping with the fixed seed
+**Given** the Owner generates the exports, the account mapping and the exchange-rate file (`rates.csv` in the product's data folder, with the columns date, currency and rate_to_usd) with the fixed seed
 **When** the Owner generates them a second time
-**Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits
+**Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits, and the rate file holds exactly one rate to USD for each transaction currency that occurs in the exports on each calendar date of the same quarter
 
 ### AC-06 (US-07) — domain invariant violation
 
@@ -201,7 +201,6 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ## 8. Open questions
 
-- [ ] Where does the file of exchange rates arrive? Default now: with roadmap step 3 (unified-gl-ledger), not in this step. — owner: Owner, due: before specifying unified-gl-ledger
 - [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
 - [ ] If the time budget runs out, what is cut first? Default now: roadmap steps 7 and 8 (products 2 and 3) first, as in idea-brief §6; only if that is not enough, the account mapping with its gate (replaced by one shared chart of accounts), then the nested-record export. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] Reading nested files and parsing locale formats differ between engines; where exactly does that code live, and when is it verified? Default now: in the adapter only, verified in roadmap step 6 and only if access to the second platform is confirmed (decision D1). — owner: Owner, due: before `/sdd:design unified-gl-inputs`
