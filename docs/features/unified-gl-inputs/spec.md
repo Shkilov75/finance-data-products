@@ -33,7 +33,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 ## 3. Non-goals
 
 - Currency conversion, using the exchange rates, and the two mandated gates (rate exists on date, totals reconcile before and after conversion) — they belong to roadmap step 3; this step only generates the rates file (AC-05) and does not read it.
-- Deliberately corrupted data and the proof that gates fail — roadmap step 4; this step only guarantees that the clean data passes.
+- Deliberately corrupted data and the proof that gates fail — roadmap step 4, which delivers one failing scenario for each of the two gates of this step (completeness and mapping, Owner decision); this step only guarantees that the clean data passes.
 - Running or claiming compatibility on a second execution platform — roadmap step 6 (access to Databricks Free Edition is confirmed, decision D1); this step keeps its logic portable but verifies nothing there.
 - Reader documentation, diagrams and sample output — roadmap step 5.
 - Reversal entries written as negative debit or credit values, and zero-amount entries — both are treated as unreadable (AC-09), not supported.
@@ -204,4 +204,3 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 - [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
 - [ ] What happens to a description that has no entry in the translation list, and does translating descriptions push this feature beyond size M (re-run `/sdd:classify-size`)? Default now: such a description is unreadable under AC-09, and the size stays M until the Owner decides. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
-- [ ] Does step 4 need a failing scenario for both gates of this step (completeness and mapping)? Default now: yes, one each. — owner: Owner, due: before specifying unified-gl-proof
