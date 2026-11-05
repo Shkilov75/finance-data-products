@@ -90,7 +90,7 @@ Target conventions, fixed by the foundation. Because no code exists yet, each li
 | Store | Engine | Accessed via | Notes |
 |---|---|---|---|
 | `build/fdp.duckdb` | DuckDB | `duckdb` Python package, SQL files | Ephemeral, gitignored, rebuilt on every run; layers `raw`, `staging`, `mart` |
-| Databricks tables | Delta on Databricks | Spark SQL through `databricks/` adapter | Optional path; access to a workspace is unconfirmed (`idea-brief.md` §8) |
+| Databricks tables | Delta on Databricks | Spark SQL through `databricks/` adapter | Optional path; access to Databricks Free Edition is confirmed (decision D1, `roadmap.md`) |
 | `products/<p>/data/*.csv` | CSV files | read by `raw` layer SQL | Synthetic inputs, committed |
 
 ## Frontend / UI foundation
@@ -109,7 +109,7 @@ Target conventions, fixed by the foundation. Because no code exists yet, each li
 
 - Synthetic data only, no real ERP connection (`idea-brief.md` §5) — shapes the whole data layer; no production hardening.
 - Time box: roughly one week from 2026-11-04, 10+ hours; order of cutting is products 3 and 2 first, EPM only reserved (`idea-brief.md` §6) — keep the skeleton minimal.
-- Databricks workspace access is unknown — the Databricks path must not be advertised as compatible in the README before a real run (`idea-brief.md` §6 risk 2).
+- Databricks Free Edition access is confirmed (decision D1) — the Databricks path must not be advertised as compatible in the README before a real run (`idea-brief.md` §6 risk 2).
 - Dialect-neutral SQL limits the use of DuckDB-only features (and Spark-only ones); a needed dialect difference goes into the adapter, not into the product SQL — ADR-0004.
 - Autotests were not required by the owner; they are kept small because green CI and a provable failing gate are cheap credibility (ADR-0001 consequences).
 - Power BI scope is unresolved (`idea-brief.md` §8); do not design around it yet.
