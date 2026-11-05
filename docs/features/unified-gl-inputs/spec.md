@@ -22,6 +22,7 @@ The committed approach follows the direction the Owner accepted in idea-brief §
 Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk 1 (time budget) and risk 2 (Databricks access unknown) still stand. Evidence limits: the document-plus-line and debit/credit facts rest on SAP-style table documentation and NetSuite-style import documentation, read on 2026-11-04; the Dynamics-style family could not be verified; date and number formats of real exports are not sourced and are treated as locale conventions. Decision overrides from the critic pass land here as «Decision override: <headline> — rationale: <reason>» bullets.
 
 - Decision override: this step carries two gates, not the one extra gate the Owner first accepted in the interview — rationale: the Owner chose a separate mapping gate after seeing that an unmapped entry would otherwise pass silently; the completeness gate also gained control totals.
+- Cut order if the time budget runs out (Owner decision): roadmap steps 7 and 8 (products 2 and 3) first, as in idea-brief §6; only if that is not enough, the account mapping with its gate (replaced by one shared chart of accounts), then the nested-record export.
 
 ## 2. Goals
 
@@ -202,7 +203,6 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 ## 8. Open questions
 
 - [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
-- [ ] If the time budget runs out, what is cut first? Default now: roadmap steps 7 and 8 (products 2 and 3) first, as in idea-brief §6; only if that is not enough, the account mapping with its gate (replaced by one shared chart of accounts), then the nested-record export. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] Reading nested files and parsing locale formats differ between engines; where exactly does that code live, and when is it verified? Default now: in the adapter only, verified in roadmap step 6 and only if access to the second platform is confirmed (decision D1). — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] What happens to a description that has no entry in the translation list, and does translating descriptions push this feature beyond size M (re-run `/sdd:classify-size`)? Default now: such a description is unreadable under AC-09, and the size stays M until the Owner decides. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] Does step 4 need a failing scenario for both gates of this step (completeness and mapping)? Default now: yes, one each. — owner: Owner, due: before specifying unified-gl-proof
