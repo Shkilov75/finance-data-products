@@ -97,7 +97,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the entries of both exports are loaded
 **When** the Reviewer looks at the aligned entries
-**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit
+**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is listed in an exceptions report shown with the run result
 
 ### AC-03 (US-04) — happy path
 
@@ -203,4 +203,3 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 ## 8. Open questions
 
 - [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
-- [ ] What happens to a description that has no entry in the translation list, and does translating descriptions push this feature beyond size M (re-run `/sdd:classify-size`)? Default now: such a description is unreadable under AC-09, and the size stays M until the Owner decides. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
