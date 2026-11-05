@@ -32,7 +32,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ## 3. Non-goals
 
-- Currency conversion, using the exchange rates, and the two mandated gates (rate exists on date, totals reconcile before and after conversion) — they belong to roadmap step 3; this step only generates the rates file (AC-05) and does not read it.
+- Currency conversion, using the exchange rates, and the two mandated gates (rate exists on date, totals reconcile before and after conversion) — they belong to roadmap step 3; this step only generates the rates file (AC-05) and does not read it. The reconciliation gate never uses a signed total (balanced documents sum to zero, so it could never fail): this step compares total debits and total credits separately; step 3 keeps that separate comparison in both source currency and USD and adds a total per account group, with a tolerance for USD rounding differences defined in the step 3 spec (Owner decision).
 - Deliberately corrupted data and the proof that gates fail — roadmap step 4, which delivers one failing scenario for each of the two gates of this step (completeness and mapping, Owner decision); this step only guarantees that the clean data passes.
 - Running or claiming compatibility on a second execution platform — roadmap step 6 (access to Databricks Free Edition is confirmed, decision D1); this step keeps its logic portable but verifies nothing there.
 - Reader documentation, diagrams and sample output — roadmap step 5.
@@ -202,4 +202,4 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ## 8. Open questions
 
-- [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
+None open.
