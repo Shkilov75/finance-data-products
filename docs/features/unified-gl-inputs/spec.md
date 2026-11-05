@@ -35,6 +35,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 - Deliberately corrupted data and the proof that gates fail — roadmap step 4; this step only guarantees that the clean data passes.
 - Running or claiming compatibility on a second execution platform — roadmap step 6 and open decision D1 (access unknown); this step keeps its logic portable but verifies nothing there.
 - Reader documentation, diagrams and sample output — roadmap step 5.
+- Reversal entries written as negative debit or credit values, and zero-amount entries — both are treated as unreadable (AC-09), not supported.
 - Real ERP connections, real financial data, incremental loads or production hardening — the repository is a synthetic-data demo (idea-brief §5).
 
 ## 4. User stories
@@ -87,7 +88,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ### AC-01 (US-02) — happy path
 
-**Given** the Reviewer has a fresh clone of the repository and the product's exports are present
+**Given** the Reviewer has a fresh clone of the repository, has done the one-time setup, and the product's exports are present
 **When** the Reviewer starts the single run command
 **Then** the run finishes successfully and prints, for each source system and each transaction currency, the number of entries loaded and their debit total and credit total, and states that both gates of the product passed
 
@@ -95,13 +96,13 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the entries of both exports are loaded
 **When** the Reviewer looks at the aligned entries
-**Then** every entry from either source system shows the same attributes under the same names, a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits
+**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit
 
 ### AC-03 (US-04) — happy path
 
 **Given** an aligned entry from either source system
 **When** the Reviewer checks where it came from
-**Then** the entry names its source system, original document and original line, and the matching row in the raw data shows the same date, amount and local account as the aligned entry
+**Then** the entry names its source system, original document and original line, and the raw record found by that source system, document and line (the raw data is kept as it arrived, so for the nested-record export it stays nested) shows the same date, amount and local account as the aligned entry, where «same» means equal after reading the value in the format of its source
 
 ### AC-04 (US-05) — happy path
 
@@ -113,31 +114,31 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the Owner generates the exports and the account mapping with the fixed seed
 **When** the Owner generates them a second time
-**Then** the files are identical to the first time, each export holds about 150 entries within one quarter of 2026, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document balances: debits equal credits within each transaction currency
+**Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits
 
 ### AC-06 (US-07) — domain invariant violation
 
-**Given** aligned entries from both source systems, including two entries of one document that share date, account and amount
+**Given** aligned entries from both source systems, including two entries of one document that share date, account and amount, and both exports carry an explicit document number and line number for every entry
 **When** the Owner runs the product twice
-**Then** every entry has an identifier, the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier the run would stop with an error that names both (an error, not a gate result)
+**Then** every entry has an identifier derived from source system, document and line, the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier, or one export held the same document and line twice, the run would stop with an error that names the source system, document and line (an error, not a gate result)
 
 ### AC-07 (US-06) — happy path
 
 **Given** clean data loaded from both exports
 **When** the completeness gate runs
-**Then** it passes because, for each source system and transaction currency, the number of entries and the total of debits and credits in the raw data equal those in the aligned entries
+**Then** it passes because, for each source system and transaction currency, the number of entries and the total of debits and credits in the raw data equal those in the aligned entries, and every raw entry, matched by source system, document and line, has exactly one aligned entry with the same date, signed amount and local account; the raw-side counts and totals are obtained by reading the raw files separately from the alignment, not by reusing its parsing
 
 ### AC-08 (US-06) — error
 
 **Given** an entry is missing from the aligned entries, or its amount differs from the raw data
 **When** the completeness gate runs
-**Then** it fails, names the source system, the transaction currency and the difference in entry count, debit total or credit total, and the run ends as not successful
+**Then** it fails, names the source system, the transaction currency and the difference in entry count, debit total or credit total, and names the source system, document and line of every entry that is missing or whose date, amount or local account differs (including two entries that exchanged amounts, which leave the totals unchanged), and the run ends as not successful
 
 ### AC-09 (US-03) — error
 
-**Given** an entry whose date or amount cannot be read in the format of its source
+**Given** an entry whose date or amount cannot be read in the format of its source, including an ERP A entry whose debit and credit are both filled, both empty or negative, any entry of either source whose amount is zero, and any entry whose amount has more decimal places than its currency allows (2 for EUR, GBP and USD)
 **When** the entries are aligned
-**Then** the system does not guess a value: the entry is not accepted as aligned, so the completeness gate reports it as lost in the way AC-08 describes
+**Then** the system does not guess a value: the entry is not accepted as aligned, so the completeness gate reports it as lost in the way AC-08 describes: the unreadable entry counts in the raw entry count but adds nothing to the raw debit or credit total, so the difference shows as a missing entry
 
 ### AC-10 (US-05) — error
 
@@ -155,13 +156,13 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** a Reviewer with a fresh clone and no accounts or credentials of any kind
 **When** the Reviewer runs the product
-**Then** the run succeeds using only the committed files, leaves the committed exports and account mapping unchanged, and every name and amount in them is fictitious and marked as synthetic
+**Then** the run succeeds using only the committed files, leaves the committed exports and account mapping unchanged, and every name and amount in them is fictitious, with the README next to the committed files and the committed file names stating that the data is synthetic
 
 ### AC-13 (US-06) — cross-context
 
-**Given** the product is active and the other three products are still reserved
+**Given** the product is declared active and the other three products are declared reserved (no gates yet), as defined in the glossary
 **When** the Reviewer runs the whole repository
-**Then** the failure of either gate of this product makes the overall run end as not successful, while the reserved products are listed as reserved and do not affect the result
+**Then** the failure of either gate of this product makes the overall run end as not successful, while the reserved products are listed as reserved in the run output and do not affect the result
 
 ### AC-14 (US-07) — cross-context
 
@@ -173,11 +174,11 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 | Aspect | Target | Measurement |
 |---|---|---|
-| Run time of the product (after setup, one command) | ≤ 30 s on a laptop | timed step in the CI log |
-| Accuracy of the completeness gate on clean data | 0 differences in entry count and in totals, exact to the smallest unit of each currency | result of the completeness gate |
+| Run time of the whole-repository run command (after the one-time setup) | ≤ 30 s on the CI runner | timed step in the CI log |
+| Accuracy of the completeness gate on clean data | 0 differences in entry count and in totals; amounts are held as fixed-precision decimals with 2 decimal places for EUR, GBP and USD and are never rounded (a value with more decimal places is unreadable, AC-09) | result of the completeness gate |
 | Reproducibility | 100%: two generations give byte-identical files, two runs give identical entry identifiers | test comparing file hashes and identifiers |
-| Readability of inputs | ≤ 250 entries per export (target ≈ 150) | test on the size of the committed files |
-| Portability of product SQL | 0 constructs specific to one engine in the product SQL | review checklist now; a real run on the second platform only after step 6 and decision D1 |
+| Readability of inputs | 100 to 250 entries per export (target ≈ 150) | test on the size of the committed files |
+| Portability of product SQL | 0 constructs specific to one engine in the product SQL files, except reading the nested-record export and parsing the locale date and number formats, which live in loading code outside the SQL files (where exactly is decided in design) | review checklist now; a real run on the second platform only after step 6 and decision D1 |
 | Gate scenarios | 1 passing scenario for each of the 2 gates of this step (failing scenarios belong to step 4) | automated test suite |
 
 ## 6.1 Security / privacy
@@ -204,4 +205,5 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 - [ ] How must the step-3 reconciliation gate compare totals, given that balanced documents sum to zero in a signed total and would never fail? Default now: this step compares debit and credit totals separately; step 3 compares per group account or in absolute terms. — owner: Owner, due: before specifying unified-gl-ledger
 - [ ] If the time budget runs out, what is cut first? Default now: roadmap steps 7 and 8 (products 2 and 3) first, as in idea-brief §6; only if that is not enough, the account mapping with its gate (replaced by one shared chart of accounts), then the nested-record export. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] Reading nested files and parsing locale formats differ between engines; where exactly does that code live, and when is it verified? Default now: in the adapter only, verified in roadmap step 6 and only if access to the second platform is confirmed (decision D1). — owner: Owner, due: before `/sdd:design unified-gl-inputs`
+- [ ] What happens to a description that has no entry in the translation list, and does translating descriptions push this feature beyond size M (re-run `/sdd:classify-size`)? Default now: such a description is unreadable under AC-09, and the size stays M until the Owner decides. — owner: Owner, due: before `/sdd:design unified-gl-inputs`
 - [ ] Does step 4 need a failing scenario for both gates of this step (completeness and mapping)? Default now: yes, one each. — owner: Owner, due: before specifying unified-gl-proof
