@@ -91,13 +91,13 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the Reviewer has a fresh clone of the repository, has done the one-time setup, and the product's exports are present
 **When** the Reviewer starts the single run command
-**Then** the run finishes successfully and prints, for each source system and each transaction currency, the number of entries loaded and their debit total and credit total, and states that both gates of the product passed
+**Then** the run finishes successfully and prints, for each source system and each transaction currency, the number of entries loaded and their debit total and credit total, and states that both gates of the product passed; the summary also shows one number, the count of records in the exceptions report, and a non-zero count is shown next to the report name
 
 ### AC-02 (US-03) — happy path
 
 **Given** the entries of both exports are loaded
 **When** the Reviewer looks at the aligned entries
-**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is listed in an exceptions report shown with the run result
+**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is written to the exceptions report (`exceptions_report.csv`), one record per description with source system, document, line and original description; missing exchange rates and reconciliation differences are not part of this report (rates belong to step 3, differences are reported by the completeness gate, AC-08)
 
 ### AC-03 (US-04) — happy path
 
