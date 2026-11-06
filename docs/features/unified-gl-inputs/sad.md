@@ -20,7 +20,7 @@ target_surfaces: [cli]  # filled in §4 — read (never re-derived) by api/seque
 **Top-3 quality goals (1-liners; full scenarios in §10):**
 
 1. **Completeness** — no entry or amount is lost between the raw files and the aligned entries; the completeness gate proves it with counts, separate debit and credit totals and a per-entry comparison (spec §6, KPI «0 lost»).
-2. **Reproducibility** — two generations give byte-identical files and two runs give identical entry identifiers (spec §6).
+2. **Reproducibility** — a fresh generation gives files byte-identical to the committed ones and to a second fresh generation, and two runs give identical entry identifiers (spec §6).
 3. **Portability** — the product SQL carries no engine-specific construct; engine differences live in one adapter folder per engine (spec §6, repo ADR-0004).
 
 **Stakeholders.**
@@ -264,7 +264,7 @@ sequenceDiagram
     S->>D: writes the same files again
     D-->>S: files written
     C->>D: compares the hashes of both generations
-    alt a file differs between the two generations
+    alt a file differs between the two generations or from the committed file
         D-->>C: reproducibility check fails naming the file
     else all files are identical
         C->>D: checks size, dates, keys, currencies, balance and rates of the files
@@ -491,7 +491,7 @@ Each top-3 goal from §1 expanded into a full scenario; numbers come verbatim fr
 
 **QG-2. Reproducibility**
 - **When:** the Owner generates the inputs twice with the fixed seed and runs the product twice.
-- **Then:** 100%: two generations give byte-identical files, two runs give identical entry identifiers.
+- **Then:** 100%: a fresh generation gives files byte-identical to the committed ones and to a second fresh generation, two runs give identical entry identifiers.
 - **How verify:** a test comparing file hashes and entry identifiers.
 
 **QG-3. Portability**
