@@ -129,8 +129,8 @@ File: `products/unified_gl/data/account_mapping_synthetic.csv` — comma delimit
 | `group_account` | VARCHAR | — | account of the common chart |
 
 **Aggregate root:** root.
-**Access patterns:** lookup by `(source_system, local_account)` → alignment join and invariant «unambiguous mapping».
-**Constraints:** `(source_system, local_account)` maps to exactly one `group_account` (AC-11), enforced by the invariant check.
+**Access patterns:** lookup by `(source_system, local_account)` → alignment join and invariant «unambiguous mapping» (`count(*) > 1` per key).
+**Constraints:** `(source_system, local_account)` occurs in exactly one row (AC-11, after `clarify`: a repeat with the same or another group account is an error), enforced by the invariant check.
 
 ### `raw.description_translation`
 
@@ -149,11 +149,11 @@ File: `products/unified_gl/data/description_translation_synthetic.csv`.
 
 ### `raw.exchange_rate`
 
-File: `products/unified_gl/data/rates.csv` (name fixed by AC-05, see <!-- TBD --> in the audit report) — columns `date`, `currency`, `rate_to_usd` as in AC-05.
+File: `products/unified_gl/data/rates_synthetic.csv` (name fixed by AC-05 after `clarify`) — columns `date`, `currency`, `rate_to_usd` as in AC-05.
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
-| `date` | VARCHAR | — | ISO `YYYY-MM-DD`, one row per currency per calendar day of Q1 2026 |
+| `date` | VARCHAR | — | ISO `YYYY-MM-DD`, one row per currency (USD included, rate 1) per calendar day, 2026-01-01 to 2026-03-31 |
 | `currency` | VARCHAR | — | EUR, GBP, USD (USD rate is 1) |
 | `rate_to_usd` | VARCHAR | — | decimal text with `.`; loaded as text, parsed in step 3 |
 

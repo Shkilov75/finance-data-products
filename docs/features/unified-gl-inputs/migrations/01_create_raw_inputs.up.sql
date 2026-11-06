@@ -56,7 +56,7 @@ FROM read_csv(
 CREATE OR REPLACE TABLE raw.exchange_rate AS
 SELECT *
 FROM read_csv(
-    'products/unified_gl/data/rates.csv',
+    'products/unified_gl/data/rates_synthetic.csv',
     header = true, all_varchar = true,
     columns = {'date': 'VARCHAR', 'currency': 'VARCHAR', 'rate_to_usd': 'VARCHAR'}
 );

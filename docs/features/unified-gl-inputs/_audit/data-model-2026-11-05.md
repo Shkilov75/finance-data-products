@@ -44,10 +44,10 @@ updated_at: "2026-11-05"
 
 ## Open points (`<!-- TBD -->`)
 
-- <!-- TBD --> **`rates.csv` vs «synthetic» in file names.** AC-05 fixes the name `rates.csv`, AC-12 requires the committed file names to state that the data is synthetic. `data-model.md` keeps `rates.csv` (spec-literal); recommendation: amend AC-05 to `rates_synthetic.csv` (via `clarify`). All other files already carry `_synthetic`.
+- ~~`rates.csv` vs «synthetic» in file names~~ — **closed 2026-11-05 by `clarify`**: AC-05 now names `rates_synthetic.csv`; `data-model.md`, staged pair 01 and `sad.md` updated.
 - <!-- TBD --> **Owner of the generator input checks** (size, quarter, keys, balance, one rate per day), already flagged in SAD §6. Not a schema question; decide in `tasks`.
 - <!-- TBD --> **Over-precision for other currencies.** The adapters hard-code «at most 2 decimals», correct for EUR, GBP and USD (AC-09). A currency with a different number of decimals (for example JPY) would need a small currency table; out of scope.
-- <!-- TBD --> **Duplicate identical rows in `account_mapping`** pass the ambiguity invariant (same group account twice) but would double an entry; they are caught later by the unique entry id invariant, with a less precise message.
+- ~~Duplicate identical rows in `account_mapping`~~ — **closed 2026-11-05 by `clarify`**: AC-11 now makes any repeat of a (source system, local account) pair an error, so the invariant counts rows, not distinct group accounts.
 
 ## Drift
 
