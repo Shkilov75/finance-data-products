@@ -1,0 +1,287 @@
+{
+  "slug": "unified-gl-inputs",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Extend the runner with manifest keys, clean start, invariant phase and InvariantViolation",
+      "layer": "app",
+      "deps": [],
+      "acs": [
+        "AC-06",
+        "AC-11"
+      ],
+      "dod": "Runner executes invariants before gates, raises InvariantViolation on a returned row and clears stale report files; unit tests with a throw-away product pass.",
+      "files_hint": [
+        "src/fdp_core/errors.py",
+        "src/fdp_core/config.py",
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/core-runner-phases.md",
+      "status": "todo"
+    },
+    {
+      "id": "T2",
+      "title": "Add report.py and extend the CLI: summary table, violating rows, exceptions line, reserved products, exit codes 2 and 3",
+      "layer": "ports",
+      "deps": [
+        "T1"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-08",
+        "AC-13"
+      ],
+      "dod": "CLI prints summary, gate lines, violating rows, exceptions line and reserved products in the contract order and returns exit codes 0/1/2/3; unit tests pass.",
+      "files_hint": [
+        "src/fdp_core/report.py",
+        "src/fdp_core/cli.py",
+        "src/fdp_core/runner.py",
+        "tests/unit/test_report_cli.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/core-report-cli.md",
+      "status": "todo"
+    },
+    {
+      "id": "T3",
+      "title": "Write the seeded data generator and commit the five synthetic input files",
+      "layer": "infra",
+      "deps": [],
+      "acs": [
+        "AC-05",
+        "AC-12"
+      ],
+      "dod": "Generator writes five byte-identical synthetic files (100-250 entries per export, Q1 2026, EUR/GBP/USD, balanced documents, daily rates) and returns the expected aligned entries.",
+      "files_hint": [
+        "products/unified_gl/data/generate.py",
+        "products/unified_gl/data/"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/generator-inputs.md",
+      "status": "todo"
+    },
+    {
+      "id": "T4",
+      "title": "Test the committed inputs: reproducibility hash, size, quarter, keys, balance, currencies, daily rates, synthetic names",
+      "layer": "tests",
+      "deps": [
+        "T3"
+      ],
+      "acs": [
+        "AC-05",
+        "AC-12"
+      ],
+      "dod": "Tests prove byte-identical regeneration, size, first-quarter dates, balanced documents, currencies, daily rates and synthetic file names.",
+      "files_hint": [
+        "tests/unit/test_inputs.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/input-checks-tests.md",
+      "status": "todo"
+    },
+    {
+      "id": "T5",
+      "title": "Create the DuckDB adapter files: raw load of the five inputs and the typed views",
+      "layer": "migration",
+      "deps": [
+        "T3"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-03"
+      ],
+      "dod": "DuckDB adapter loads the five inputs as they arrived and exposes raw.typed_erp_a/typed_erp_b with NULL for unreadable values; adapter tests pass.",
+      "files_hint": [
+        "docs/features/unified-gl-inputs/migrations/01_create_raw_inputs.up.sql",
+        "docs/features/unified-gl-inputs/migrations/01_create_raw_inputs.down.sql",
+        "docs/features/unified-gl-inputs/migrations/02_create_typed_views.up.sql",
+        "docs/features/unified-gl-inputs/migrations/02_create_typed_views.down.sql",
+        "products/unified_gl/adapters/duckdb/",
+        "tests/unit/test_adapter_duckdb.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/adapter-raw-typed.md",
+      "status": "todo"
+    },
+    {
+      "id": "T6",
+      "title": "Create the control views (independent raw side of the completeness gate)",
+      "layer": "migration",
+      "deps": [
+        "T5"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-09"
+      ],
+      "dod": "Control views re-read the raw tables with a separate parse; every unreadable-entry rule yields a row with NULL signed_amount; tests pass.",
+      "files_hint": [
+        "docs/features/unified-gl-inputs/migrations/03_create_control_views.up.sql",
+        "docs/features/unified-gl-inputs/migrations/03_create_control_views.down.sql",
+        "products/unified_gl/adapters/duckdb/",
+        "tests/unit/test_control_views.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/adapter-control-views.md",
+      "status": "todo"
+    },
+    {
+      "id": "T7",
+      "title": "Create staging.ledger_entry: the aligned entry set (neutral SQL)",
+      "layer": "migration",
+      "deps": [
+        "T5"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-04",
+        "AC-09",
+        "AC-10"
+      ],
+      "dod": "staging.ledger_entry holds every readable entry of both sources in one shape with signed amount, group account, common description and deterministic entry_id; tests against the generator's expected entries pass.",
+      "files_hint": [
+        "docs/features/unified-gl-inputs/migrations/04_create_staging_ledger_entry.up.sql",
+        "docs/features/unified-gl-inputs/migrations/04_create_staging_ledger_entry.down.sql",
+        "products/unified_gl/sql/staging/",
+        "tests/unit/test_ledger_entry.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/staging-ledger-entry.md",
+      "status": "todo"
+    },
+    {
+      "id": "T8",
+      "title": "Write the three invariant SQL checks: unique document and line, unique entry id, unambiguous mapping",
+      "layer": "domain",
+      "deps": [
+        "T1",
+        "T6",
+        "T7"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-11"
+      ],
+      "dod": "Three zero-row invariant SQL files stop the run on a repeated document+line, a repeated entry_id or an ambiguous mapping, naming the offenders; clean data returns zero rows; tests pass.",
+      "files_hint": [
+        "products/unified_gl/invariants/",
+        "tests/unit/test_invariants.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/invariant-checks.md",
+      "status": "todo"
+    },
+    {
+      "id": "T9",
+      "title": "Write the completeness gate and the mapping gate",
+      "layer": "domain",
+      "deps": [
+        "T6",
+        "T7"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-08",
+        "AC-09",
+        "AC-10"
+      ],
+      "dod": "01_completeness.sql and 02_mapping.sql return zero rows on clean data and the specified rows (source system, currency, difference; document and line; local account) on the corrupted tmp copies; tests pass.",
+      "files_hint": [
+        "products/unified_gl/gates/01_completeness.sql",
+        "products/unified_gl/gates/02_mapping.sql",
+        "tests/unit/test_gates.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/gates-completeness-mapping.md",
+      "status": "todo"
+    },
+    {
+      "id": "T10",
+      "title": "Write the summary query and the exceptions report query",
+      "layer": "app",
+      "deps": [
+        "T7"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-14"
+      ],
+      "dod": "summary.sql returns entries and debit/credit totals per source system and currency present; exceptions_report.sql returns aligned entries without an exact translation row; tests pass.",
+      "files_hint": [
+        "products/unified_gl/reports/summary.sql",
+        "products/unified_gl/reports/exceptions_report.sql",
+        "tests/unit/test_reports_sql.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/report-queries.md",
+      "status": "todo"
+    },
+    {
+      "id": "T11",
+      "title": "Activate unified_gl: product.toml manifest, smoke-test update, timed CI run",
+      "layer": "wiring",
+      "deps": [
+        "T2",
+        "T5",
+        "T6",
+        "T7",
+        "T8",
+        "T9",
+        "T10"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-13"
+      ],
+      "dod": "product.toml activates unified_gl with all manifest keys; make run succeeds end to end, the smoke test is updated and CI runs a timed make run.",
+      "files_hint": [
+        "products/unified_gl/product.toml",
+        "tests/unit/test_smoke.py",
+        ".github/workflows/ci.yml",
+        "products/unified_gl/gates/.gitkeep",
+        "products/unified_gl/sql/.gitkeep",
+        "products/unified_gl/data/.gitkeep"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/manifest-wiring-ci.md",
+      "status": "todo"
+    },
+    {
+      "id": "T12",
+      "title": "Document the aligned entry attributes and the synthetic-data notice in the product README",
+      "layer": "docs",
+      "deps": [
+        "T7"
+      ],
+      "acs": [
+        "AC-12",
+        "AC-14"
+      ],
+      "dod": "Product README documents all aligned-entry attributes, states the data is synthetic, and explains gates, invariants, exit codes and reports.",
+      "files_hint": [
+        "products/unified_gl/README.md"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/readme-attributes.md",
+      "status": "todo"
+    },
+    {
+      "id": "T13",
+      "title": "End-to-end tests: five source differences, known values, traceability, exceptions report, exit codes",
+      "layer": "tests",
+      "deps": [
+        "T11",
+        "T12",
+        "T4"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-07",
+        "AC-12",
+        "AC-13",
+        "AC-14"
+      ],
+      "dod": "Integration tests prove the five source differences, equality with the generator's known values, traceability to raw records, the summary/exceptions output and exit 0 for the clean run.",
+      "files_hint": [
+        "tests/integration/test_unified_gl_run.py",
+        "tests/integration/conftest.py"
+      ],
+      "file": "docs/features/unified-gl-inputs/tasks/e2e-tests.md",
+      "status": "todo"
+    }
+  ]
+}
