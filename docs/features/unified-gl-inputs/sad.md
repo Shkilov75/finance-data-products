@@ -245,6 +245,200 @@ sequenceDiagram
     CLI-->>Reviewer: summary table, violating rows and exit code 1
 ```
 
+### Flow 3: Generate the input files twice (US-01; AC-05, AC-12)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as client
+    participant S as service
+    participant D as data-store
+
+    Note over C,S: Precondition: the generator has a fixed seed and builds every amount from integer cents
+    C->>S: starts the generator
+    S->>D: writes ERP A export, ERP B export, account mapping, translation list and rates file
+    Note over S,D: persists input files (two exports, account mapping, translation list, rates) and every file name contains synthetic
+    D-->>S: files written
+    S-->>C: number of entries per export
+    C->>S: starts the generator a second time
+    S->>D: writes the same files again
+    D-->>S: files written
+    C->>D: compares the hashes of both generations
+    alt a file differs between the two generations
+        D-->>C: reproducibility check fails naming the file
+    else all files are identical
+        C->>D: checks size, dates, keys, currencies, balance and rates of the files
+        alt an export is outside 100 to 250 entries, an entry is outside the first quarter, a document has no number or line, a document does not balance, or a rate is missing for a currency and date
+            D-->>C: input check fails naming the export or document or the currency and date
+        else all input checks hold
+            Note over C,D: Postcondition: identical files, each export 100 to 250 entries, at least EUR and GBP and USD, one rate per currency per calendar day
+        end
+    end
+    Note over S,D: only the generator writes the input files and a product run opens them read-only (AC-12)
+```
+
+### Flow 4: Summary and exceptions report for the Reviewer (US-02; AC-01, AC-14, report part of AC-02)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as client
+    participant S as service
+    participant D as data-store
+    participant O as data-store
+
+    Note over C,S: Precondition: the aligned entry set is built, invariants are clean and both gates have run
+    S->>D: runs the summary query on the aligned entry set
+    D-->>S: one row per source system and transaction currency with entry count, debit total and credit total
+    Note over S,D: the currency list comes from the aligned entries and never from the rates file (AC-14)
+    S->>D: runs the exceptions report query
+    D-->>S: one row per description without translation with source system, document, line and original text
+    S->>O: writes the exceptions report and the gate report
+    Note over S,O: persists exceptions report records and gate status with number of violating rows
+    O-->>S: files written
+    alt the exceptions report has records
+        S-->>C: summary table, gate statuses and the record count next to the report name
+    else the exceptions report is empty
+        S-->>C: summary table, gate statuses and a count of 0
+    end
+    Note over S,C: a failed gate adds its violating rows to the output as in Flow 2
+    Note over C,S: Postcondition: the Reviewer sees entries per source system and currency, the gate result and the exceptions count
+```
+
+### Flow 5: Align both exports into one entry set (US-03, US-04, US-05; AC-02, AC-03, AC-04, AC-09, AC-10)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S as service
+    participant F as data-store
+    participant D as data-store
+
+    Note over S,F: Precondition: the input files are committed and opened read-only
+    S->>F: reads the two exports, account mapping, translation list and rates
+    F-->>S: file contents as they arrived
+    S->>D: loads the raw tables as they arrived
+    Note over S,D: persists raw records of both exports (ERP B stays nested), account mapping, translation list and rates
+    S->>D: creates typed flat views of both exports
+    Note over S,D: a date or amount that cannot be read in its source format becomes empty and is never guessed
+    S->>D: builds the aligned entry set from the typed views for every row
+    alt date or amount unreadable, or ERP A debit and credit both filled or both empty or negative, or amount zero, or more decimals than the currency allows
+        D-->>S: the entry is not accepted as aligned
+        Note over S,D: the entry is absent from the aligned set and the completeness gate reports it as lost (Flow 6)
+    else the entry is readable
+        D->>D: derives the signed amount (debit positive and credit negative) and the entry identifier from source system, document and line
+        D->>D: looks up the group account by source system and local account
+        opt the local account has no mapping row for its source system
+            D->>D: keeps the entry with an empty group account
+            Note over D: the mapping gate fails and names source system and local account (Flow 2)
+        end
+        D->>D: looks up the description in the translation list
+        opt the description has no translation
+            D->>D: keeps the original description
+            Note over D: the exceptions report lists it (Flow 4)
+        end
+        Note over S,D: persists aligned entry (entry identifier, source system, document, line, date, signed amount, currency, local account, group account, description)
+    end
+    D-->>S: aligned entry set built
+    Note over S,D: Postcondition: every readable entry has the same attributes under the same names and its raw record is found by source system, document and line (AC-03)
+```
+
+### Flow 6: Completeness gate on an independent control path (US-06; AC-07, AC-08, AC-09)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as client
+    participant S as service
+    participant D as data-store
+
+    Note over C,D: Precondition: raw tables are loaded, the aligned entry set is built and invariants are clean
+    S->>D: runs the completeness gate
+    D->>D: reads the raw tables with a separate parse that does not reuse the alignment
+    D->>D: compares per source system and transaction currency the entry count, debit total and credit total of the raw side and the aligned side
+    D->>D: compares every raw entry matched by source system, document and line with its aligned entry for date, signed amount and local account
+    alt every count and total is equal and every raw entry has exactly one equal aligned entry
+        D-->>S: no violating rows
+        S-->>C: gate completeness passed
+    else a difference is found
+        D-->>S: rows naming source system, currency and the difference, and source system, document and line of each entry that is missing or differs
+        Note over D,S: an unreadable entry counts in the raw entry count and adds nothing to the raw totals so it shows as missing (AC-09)
+        Note over D,S: two entries that exchanged amounts leave the totals unchanged and are found by the entry comparison
+        S-->>C: gate completeness failed with the violating rows and the run ends as not successful
+    end
+    Note over S,D: persists completeness gate result (status and number of violating rows) for the gate report
+```
+
+### Flow 7: A second run gives the same identifiers (US-07; AC-06)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as client
+    participant S as service
+    participant D as data-store
+
+    Note over C,S: Precondition: the same input files with an explicit document number and line number for every entry
+    C->>S: starts the first run
+    S->>D: rebuilds the layers and builds the aligned entry set
+    Note over S,D: persists aligned entries with entry identifier derived from source system, document and line
+    D-->>S: aligned entry set built
+    C->>D: reads the entry identifiers of the first run
+    D-->>C: identifiers of the first run
+    C->>S: starts the second run
+    S->>D: rebuilds the layers from scratch and builds the aligned entry set again
+    D-->>S: aligned entry set built
+    C->>D: reads the entry identifiers of the second run
+    D-->>C: identifiers of the second run
+    alt an entry has a different identifier in the second run
+        C-->>C: reproducibility check fails naming source system, document and line of the entry
+    else all identifiers are equal
+        Note over C,D: Postcondition: every entry keeps the same identifier and the identifiers are unique across both source systems
+    end
+    Note over S,D: a repeated identifier or a repeated document and line stops the run as in Flow 1
+```
+
+### Coverage of user stories and acceptance criteria
+
+Flows 1 and 2 are the seeded flows above. Flows 3 to 7 use only the generic participants client, service and data-store (the role of the client is the Owner, the Reviewer or the test suite, named in each precondition).
+
+| User story | Realised by |
+|---|---|
+| US-01 Generate reproducible exports | Flow 3 |
+| US-02 See what each source delivered | Flow 4, Flow 1 |
+| US-03 See one common entry shape | Flow 5 |
+| US-04 Trace an entry to its source | Flow 5 |
+| US-05 See entries mapped to group accounts | Flow 5, Flow 2 (no mapping), Flow 1 (ambiguous mapping) |
+| US-06 Trust the completeness gate | Flow 6, Flow 2 |
+| US-07 Hand over a stable entry set | Flow 7, Flow 5, Flow 1 (repeated key) |
+
+| Acceptance criterion | Shown by |
+|---|---|
+| AC-01 | Flow 4 (summary and exceptions count) and Flow 1 (happy path) |
+| AC-02 | Flow 5 (common shape, translation `opt`) and Flow 4 (exceptions report) |
+| AC-03 | Flow 5 (postcondition: raw record found by source system, document and line) |
+| AC-04 | Flow 5 (group account looked up by source system and local account) |
+| AC-05 | Flow 3 (hash comparison and input checks) |
+| AC-06 | Flow 7 (stable identifiers) and Flow 1 (error branch for a repeated key) |
+| AC-07 | Flow 6 (`alt` branch with equal counts, totals and entries) |
+| AC-08 | Flow 6 (`else` branch with the violating rows) and Flow 2 |
+| AC-09 | Flow 5 (`alt` branch for an unreadable entry) and Flow 6 (note: shows as missing) |
+| AC-10 | Flow 5 (`opt` branch for no mapping) and Flow 2 (mapping gate fails) |
+| AC-11 | Flow 1 (error branch for an ambiguous mapping) |
+| AC-12 | Flow 3 and Flow 5 (notes: only the generator writes the inputs, a run reads them read-only). Non-runtime: «synthetic» in the file names and in the README, which is a static property of the committed files |
+| AC-13 | Flow 1 (reserved products listed, exit code) and Flow 2 (failed gate, run not successful) |
+| AC-14 | Flow 4 (note: the currency list comes from the aligned entries). Non-runtime: the documentation of every attribute of the aligned entry in the README |
+
+**Flagged for `design` (no ADR written here):**
+- Flows 1 and 2 name the §5 containers as participants, Flows 3 to 7 use the generic roles required by the `sequences` stage. The two styles can be unified when `design` is next revised.
+- The spec does not say whether the input checks of Flow 3 (size, quarter, keys, balance, one rate per currency per day) run inside the generator or in the test suite. The flow shows them as a check by the client after generation, which matches the file-hash test of §8. `design` or `tasks` should fix the owner of these checks.
+- No participant outside §5 was needed: the generator is the «Data generator» container of §5.
+
+**Persist hints for `data-model`:**
+- `staging.ledger_entry` is written once per run and read by the completeness gate (matched by source system, document and line), the mapping gate (by source system and local account), the summary (by source system and transaction currency) and the identifier check of Flow 7 (by entry identifier).
+- The raw tables are read by the typed views, the control views and the account lookups (the mapping by source system and local account, the translation list by original description).
+- The exceptions report and the gate report are files in `build/`, not tables.
+
 ## 7. Deployment view
 
 The feature adds no infrastructure. It runs as one Python process with an embedded DuckDB file, either on the machine of the Owner or the Reviewer or on the GitHub Actions runner (`ubuntu-latest`); there are no replicas, services, network calls or credentials. The Databricks Free Edition path is a separate, manually verified run at roadmap step 6 and is not part of this deployment.
