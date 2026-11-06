@@ -15,7 +15,7 @@ ticket: ""
 
 ## Context
 
-Two rules of this feature must end the run with an error that names the offenders, not appear as a gate result: a source system, document and line that occurs twice or an entry identifier that occurs twice (AC-06), and a local account that the account mapping assigns to two different group accounts (AC-11). With such data the identifiers and totals that follow would be wrong, so the product must not go on. The current runner knows only layers and gates; a failed gate is a normal result and the run goes on (ADR-0003 of the repository).
+Two rules of this feature must end the run with an error that names the offenders, not appear as a gate result: a source system, document and line that occurs twice or an entry identifier that occurs twice (AC-06), and a local account that the account mapping lists in more than one row (with different or identical group accounts) (AC-11). With such data the identifiers and totals that follow would be wrong, so the product must not go on. The current runner knows only layers and gates; a failed gate is a normal result and the run goes on (ADR-0003 of the repository).
 
 ## Decision drivers
 

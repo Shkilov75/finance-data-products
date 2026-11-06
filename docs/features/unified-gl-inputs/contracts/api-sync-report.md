@@ -62,7 +62,7 @@ Two `low`/`medium` rows are declared incompleteness: the generator write-failure
 
 ## Findings and resolutions
 
-Four flags were raised (≥3 pauses the run); three were resolved with the owner on 2026-11-06, no source file was edited.
+Five flags were raised (F1–F3, N1, N2; ≥3 pauses the run); three were resolved with the owner on 2026-11-06, no source file was edited.
 
 | # | Finding | Kind | Resolution |
 |---|---|---|---|
@@ -84,6 +84,7 @@ Four flags were raised (≥3 pauses the run); three were resolved with the owner
 Found by reading `runner.py:41`: only `build/fdp.duckdb` was deleted at the start of a run, so `report.json` and `exceptions_report.csv` of an earlier run could survive an exit 2 or 3 and look current (SAD §11 risk). `cli.md` §3.1, §3.2, §3.4 and §3.6 now fix the rule (draft 0.1.0 clarified, version not bumped).
 
 - **implement:** do the cleaning next to `cfg.db_path.unlink(...)` in `build_layers` (`runner.py:41`): delete `build/report.json` and `build/<product>/` of every active product; leave other files in `build/`.
+- **implement (catch-all exit 3):** `cli.main` catches every unexpected exception, not only `FdpError`, prints `error: <message>` and exits 3, so a crash is never read as a failed gate (code 1). Covers N1 and OQ-2; `cli.md` §2. Test: a missing input file gives exit 3.
 - **tasks / plan-tests:** one test: a successful run, then a run with an ambiguous mapping (exit 2); assert that `report.json` and `exceptions_report.csv` are gone. A run ending in exit 1 must still leave fresh reports (SAD §1 override).
 
 ## Lint

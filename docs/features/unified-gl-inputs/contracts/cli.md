@@ -31,8 +31,8 @@ No command takes credentials or a network address (spec §6.1, AC-12). Every com
 |---|---|---|---|
 | 0 | The run finished and every gate of every active product passed | `runner.exit_code` | AC-01, AC-13 |
 | 1 | At least one gate failed. A failed gate is a **result**, not an exception | `runner.exit_code` | AC-08, AC-10, AC-13; Flow 2 |
-| 2 | An invariant check returned rows: `InvariantViolation` (subclass of `FdpError`). No gate, summary or export has run | `cli.main` | AC-06, AC-11; ADR-0003; Flow 1 |
-| 3 | Any other `FdpError` (`LayerBuildError`, `ManifestError`): message printed, run stopped | `cli.main` | SAD §7, §8 |
+| 2 | An invariant check returned rows: `InvariantViolation` (subclass of `FdpError`). No gate, summary or export has run | `cli.main` | AC-06, AC-11; feature ADR-0003; Flow 1 |
+| 3 | Any other `FdpError` (`LayerBuildError`, `ManifestError`): message printed, run stopped. Any other unexpected exception also gives 3: `cli.main` catches it, so it is never mistaken for a failed gate (code 1) | `cli.main` | SAD §7, §8; report N1, OQ-2 |
 
 **Known collision (accepted).** `argparse` also exits with 2 on a usage error (unknown command or flag). The two are told apart by the first line on stderr: `usage:` for argparse, `invariant violation:` for code 2. Code is not changed (decision of the `api` run, 2026-11-06; see report finding F1).
 
@@ -52,7 +52,7 @@ Environment: none. Working directory: any inside the repository (root is found f
 
 1. Start clean, then rebuild. Delete `build/fdp.duckdb`, `build/report.json` and the folder `build/<product>/` of every active product (repo ADR-0003 for the database file); other files in `build/` are not touched. Then create `build/fdp.duckdb` with the empty layers `raw`, `staging`, `mart`.
 2. For each active product: execute the engine files (`adapters/duckdb/`, `{engine}` in manifest paths is replaced by the engine name, default `duckdb`), then the neutral `sql` files. A failing file → exit 3.
-3. Run the product's `invariants` (zero-row convention). Any returned row → exit 2, **stop**.
+3. Run the product's `invariants` in the order of the manifest list (zero-row convention). The first invariant that returns rows stops the run with exit 2; the invariants after it are not executed.
 4. Run the product's `gates` (zero-row convention). A failed gate does not stop the run.
 5. Run the `summary` query and the `exports`; write the files; print the output.
 6. Exit with 0 or 1.
@@ -80,7 +80,7 @@ In this order:
 3. **Violating rows** of every failed gate, each row printed in full (AC-08, AC-10): completeness rows name source system, transaction currency and the difference in entry count, debit total or credit total, and source system, document and line of each entry that is missing or differs; mapping rows name source system and local account.
 4. **Exceptions line**: `exceptions_report.csv: <n> records` — always printed, `0` included (AC-01).
 5. **Reserved products**: one line per product with status `reserved`, e.g. `reserved: cost_center_model` (AC-13). They do not affect the exit code.
-6. **Final line**: `<n> gates run` (kept) and, on exit 0, a sentence that both gates of the product passed (rendered by the core from the gate list, ADR-0004).
+6. **Final line**: `<n> gates run` (kept) and, on exit 0, a sentence that both gates of the product passed (rendered by the core from the gate list, feature ADR-0004).
 
 Example (exit 0, placeholder values):
 
@@ -98,14 +98,23 @@ reserved: functional_model
 2 gates run; both gates of unified_gl passed
 ```
 
-Example (exit 1, placeholder values):
+Example (exit 1, placeholder values; one ERP_A EUR debit of 100.00 is missing from the aligned entries, so the summary, which reads the aligned entries, shows 60 entries where the raw data has 61):
 
 ```
-FAIL	01_completeness	2 violating rows
-  ERP_A EUR entries: raw 61, aligned 60
-  ERP_A DOC-0007 line 2: missing in aligned entries
+source_system  transaction_currency  entries  debit_total  credit_total
+ERP_A          EUR                       60     48110.40      48210.40
+ERP_A          GBP                       52     30118.00      30118.00
+ERP_B          USD                       70     55290.15      55290.15
+FAIL	01_completeness	3 violating rows
 PASS	02_mapping	0 violating rows
+  ERP_A EUR entries: raw 61, aligned 60
+  ERP_A EUR debit_total: raw 48210.40, aligned 48110.40
+  ERP_A DOC-0007 line 2: missing in aligned entries
 exceptions_report.csv: 4 records
+reserved: cost_center_model
+reserved: epm
+reserved: functional_model
+2 gates run
 ```
 
 ### 3.4 Standard error (exit 2 and exit 3)
@@ -169,7 +178,7 @@ Only the generator writes the input files; a product run opens them read-only (A
 
 ## 6. Product manifest keys (interface between a product and `fdp_core`)
 
-`products/unified_gl/product.toml` after this feature (ADR-0003, ADR-0004):
+`products/unified_gl/product.toml` after this feature (feature ADR-0003, feature ADR-0004):
 
 | Key | Type | Meaning |
 |---|---|---|
