@@ -86,6 +86,8 @@ Found by reading `runner.py:41`: only `build/fdp.duckdb` was deleted at the star
 - **implement:** do the cleaning next to `cfg.db_path.unlink(...)` in `build_layers` (`runner.py:41`): delete `build/report.json` and `build/<product>/` of every active product; leave other files in `build/`.
 - **implement (catch-all exit 3):** `cli.main` catches every unexpected exception, not only `FdpError`, prints `error: <message>` and exits 3, so a crash is never read as a failed gate (code 1). Covers N1 and OQ-2; `cli.md` §2. Test: a missing input file gives exit 3.
 - **tasks / plan-tests:** one test: a successful run, then a run with an ambiguous mapping (exit 2); assert that `report.json` and `exceptions_report.csv` are gone. A run ending in exit 1 must still leave fresh reports (SAD §1 override).
+- **tasks / plan-tests (stdout order):** one test of the order in `cli.md` §3.3 for exit 1 with **both** gates failing: all gate lines first, then the violating rows of every failed gate (completeness rows, then mapping rows). With one failed gate, «gates, then violations» and «violations under their gate» print the same text, so only two failed gates tell them apart.
+  - The scenario needs both gates to fail at once. Roadmap step 4 delivers one failing scenario per gate (spec §3), not a combined one. So either step 4 adds a combined scenario, or this test builds it by hand in a temporary copy of the inputs (for example one lost ERP_A entry and one local account removed from the mapping), without changing committed files (AC-12). Owner of the choice: `tasks`.
 
 ## Lint
 
