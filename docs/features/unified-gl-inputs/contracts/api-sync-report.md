@@ -79,6 +79,13 @@ Four flags were raised (≥3 pauses the run); three were resolved with the owner
 | OQ-1 | Confirm the CSV header spelling of `exceptions_report.csv` (`source_system,document,line,original_description`) | `tasks` | before the exceptions-report task starts |
 | OQ-2 | Wrap non-`FdpError` file-reading failures into exit 3 (N1) | `implement` | with the runner task |
 
+## Requirements for `tasks` and `implement` (stale reports, 2026-11-06)
+
+Found by reading `runner.py:41`: only `build/fdp.duckdb` was deleted at the start of a run, so `report.json` and `exceptions_report.csv` of an earlier run could survive an exit 2 or 3 and look current (SAD §11 risk). `cli.md` §3.1, §3.2, §3.4 and §3.6 now fix the rule (draft 0.1.0 clarified, version not bumped).
+
+- **implement:** do the cleaning next to `cfg.db_path.unlink(...)` in `build_layers` (`runner.py:41`): delete `build/report.json` and `build/<product>/` of every active product; leave other files in `build/`.
+- **tasks / plan-tests:** one test: a successful run, then a run with an ambiguous mapping (exit 2); assert that `report.json` and `exceptions_report.csv` are gone. A run ending in exit 1 must still leave fresh reports (SAD §1 override).
+
 ## Lint
 
 `spectral` does not apply (no OpenAPI). Suggested checks instead, to be written by `plan-tests`: one test per exit code of §2, one test that the stdout of §3.3 contains the exceptions line with 0 and with n records, one test that a run leaves every committed input file byte-identical (AC-12).

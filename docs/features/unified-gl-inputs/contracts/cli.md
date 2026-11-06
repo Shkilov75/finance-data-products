@@ -50,7 +50,7 @@ Environment: none. Working directory: any inside the repository (root is found f
 
 ### 3.1 Phases (order is part of the contract)
 
-1. Rebuild `build/fdp.duckdb` with the empty layers `raw`, `staging`, `mart` (the file is deleted first, repo ADR-0003).
+1. Start clean, then rebuild. Delete `build/fdp.duckdb`, `build/report.json` and the folder `build/<product>/` of every active product (repo ADR-0003 for the database file); other files in `build/` are not touched. Then create `build/fdp.duckdb` with the empty layers `raw`, `staging`, `mart`.
 2. For each active product: execute the engine files (`adapters/duckdb/`, `{engine}` in manifest paths is replaced by the engine name, default `duckdb`), then the neutral `sql` files. A failing file → exit 3.
 3. Run the product's `invariants` (zero-row convention). Any returned row → exit 2, **stop**.
 4. Run the product's `gates` (zero-row convention). A failed gate does not stop the run.
@@ -66,6 +66,8 @@ Environment: none. Working directory: any inside the repository (root is found f
 | Writes | `build/report.json` | Array of `{gate, status, violations}`; also written after a failed gate |
 | Writes | `build/unified_gl/exceptions_report.csv` | Header `source_system,document,line,original_description`; **always** written, header only when no record (AC-02); also written after a failed gate (SAD §1 override) |
 | Writes | nothing else | In particular nothing under `products/` |
+
+Report files are deleted in phase 1 and written in phase 5. So after exit 0 and exit 1 the files are fresh from this run; after exit 2 and exit 3 (the run stops before phase 5) none exist, and no file of an earlier run is left.
 
 `rates_synthetic.csv` is loaded into `raw.exchange_rate` and not read further in this step.
 
@@ -122,6 +124,8 @@ invariant violation: unambiguous mapping
   ERP_B 4710 appears 2 times in account_mapping_synthetic.csv
 ```
 
+After exit 2 or exit 3 no report file exists: neither `build/report.json` nor `build/<product>/exceptions_report.csv`, from this run or from an earlier one (§3.1 phase 1).
+
 ### 3.5 Error scenarios
 
 | Scenario | Exit | Spec | Flow |
@@ -138,7 +142,7 @@ invariant violation: unambiguous mapping
 
 ### 3.6 Idempotency
 
-Two runs on the same inputs give identical `entry_id` values and identical exit codes (AC-06). Nothing carries over between runs: the database file is deleted first.
+Two runs on the same inputs give identical `entry_id` values and identical exit codes (AC-06). Nothing carries over between runs: the database file, `build/report.json` and `build/<product>/` are deleted first (§3.1 phase 1).
 
 ## 4. C2 — `fdp products`
 
