@@ -2,7 +2,7 @@
 status: Draft
 owner: "maksym.shkilov@gmail.com"
 reviewers: []
-updated_at: "2026-11-04"
+updated_at: "2026-11-05"
 feature_size: "M"
 ---
 
@@ -91,13 +91,13 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the Reviewer has a fresh clone of the repository, has done the one-time setup, and the product's exports are present
 **When** the Reviewer starts the single run command
-**Then** the run finishes successfully and prints, for each source system and each transaction currency, the number of entries loaded and their debit total and credit total, and states that both gates of the product passed; the summary also shows one number, the count of records in the exceptions report, and a non-zero count is shown next to the report name
+**Then** the run finishes successfully and prints, for each source system and each transaction currency, the number of entries loaded and their debit total and credit total, and states that both gates of the product passed; the summary also shows one number, the count of records in the exceptions report, always shown (0 included) next to the report name
 
 ### AC-02 (US-03) — happy path
 
 **Given** the entries of both exports are loaded
 **When** the Reviewer looks at the aligned entries
-**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A exactly one of the debit and credit columns is filled with a non-negative number, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is written to the exceptions report (`exceptions_report.csv`), one record per description with source system, document, line and original description; missing exchange rates and reconciliation differences are not part of this report (rates belong to step 3, differences are reported by the completeness gate, AC-08)
+**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A a debit or credit cell is filled when it is not empty (a cell holding zero counts as filled), and exactly one of the two is filled, with a number greater than zero, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is written to the exceptions report (`exceptions_report.csv`), one record per aligned entry whose description has no translation, with source system, document, line and original description, written to the build area on every run (with only its header when there is no such entry); a description is translated only when its whole text equals an entry of the translation list exactly (no word-level or case-insensitive matching), and the common language is English; missing exchange rates and reconciliation differences are not part of this report (rates belong to step 3, differences are reported by the completeness gate, AC-08)
 
 ### AC-03 (US-04) — happy path
 
@@ -113,33 +113,33 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ### AC-05 (US-01) — happy path
 
-**Given** the Owner generates the exports, the account mapping and the exchange-rate file (`rates.csv` in the product's data folder, with the columns date, currency and rate_to_usd) with the fixed seed
+**Given** the Owner generates the exports, the account mapping and the exchange-rate file (`rates_synthetic.csv` in the product's data folder, with the columns date, currency and rate_to_usd) with the fixed seed
 **When** the Owner generates them a second time
-**Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits, and the rate file holds exactly one rate to USD for each transaction currency that occurs in the exports on each calendar date of the same quarter
+**Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits, and the rate file holds exactly one rate to USD for each transaction currency that occurs in the exports (USD included, with the rate 1) on every calendar day from 2026-01-01 to 2026-03-31
 
 ### AC-06 (US-07) — domain invariant violation
 
 **Given** aligned entries from both source systems, including two entries of one document that share date, account and amount, and both exports carry an explicit document number and line number for every entry
 **When** the Owner runs the product twice
-**Then** every entry has an identifier derived from source system, document and line, the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier, or one export held the same document and line twice, the run would stop with an error that names the source system, document and line (an error, not a gate result)
+**Then** every entry has an identifier derived from source system, document and line (the three values in this order, as written in the source apart from trimmed spaces, joined by a fixed separator), the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier, or one export held the same document and line twice (checked on the raw records of each export before any readability rule is applied, so an unreadable duplicate also stops the run), the run would stop with an error that names the source system, document and line (an error, not a gate result)
 
 ### AC-07 (US-06) — happy path
 
 **Given** clean data loaded from both exports
 **When** the completeness gate runs
-**Then** it passes because, for each source system and transaction currency, the number of entries and the total of debits and credits in the raw data equal those in the aligned entries, and every raw entry, matched by source system, document and line, has exactly one aligned entry with the same date, signed amount and local account; the raw-side counts and totals are obtained by reading the raw files separately from the alignment, not by reusing its parsing
+**Then** it passes because, for each source system and transaction currency, the number of entries and the total of debits and credits in the raw data equal those in the aligned entries, and every raw entry, matched by source system, document and line, has exactly one aligned entry with the same date, signed amount and local account; the raw-side counts and totals are obtained from the loaded raw records by a separate reading, written independently of the alignment and not reusing its parsing; a record lost while the files are loaded is caught by a separate test that compares the number of records in each file with the number loaded
 
 ### AC-08 (US-06) — error
 
 **Given** an entry is missing from the aligned entries, or its amount differs from the raw data
 **When** the completeness gate runs
-**Then** it fails, names the source system, the transaction currency and the difference in entry count, debit total or credit total, and names the source system, document and line of every entry that is missing or whose date, amount or local account differs (including two entries that exchanged amounts, which leave the totals unchanged), and the run ends as not successful
+**Then** it fails, names the source system, the transaction currency and the difference in entry count, debit total or credit total, and names the source system, document and line of every entry that is missing or whose date, amount or local account differs (including two entries that exchanged amounts, which leave the totals unchanged), and the run ends as not successful; the completeness gate is one gate, and its result lists both kinds of difference (counts and totals per source system and transaction currency, and individual entries)
 
 ### AC-09 (US-03) — error
 
 **Given** an entry whose date or amount cannot be read in the format of its source, including an ERP A entry whose debit and credit are both filled, both empty or negative, any entry of either source whose amount is zero, and any entry whose amount has more decimal places than its currency allows (2 for EUR, GBP and USD)
 **When** the entries are aligned
-**Then** the system does not guess a value: the entry is not accepted as aligned, so the completeness gate reports it as lost in the way AC-08 describes: the unreadable entry counts in the raw entry count but adds nothing to the raw debit or credit total, so the difference shows as a missing entry
+**Then** the system does not guess a value: the entry is not accepted as aligned, so the completeness gate reports it as lost in the way AC-08 describes: the unreadable entry counts in the raw entry count but adds nothing to the raw debit or credit total, so the difference shows as a missing entry; the independent raw-side reading of AC-07 applies each of the unreadable-entry rules listed here by itself, so that no part of an unreadable entry reaches the raw totals
 
 ### AC-10 (US-05) — error
 
@@ -149,15 +149,15 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ### AC-11 (US-05) — domain invariant violation
 
-**Given** the account mapping lists two different group accounts for the same local account of the same source system
+**Given** the account mapping lists the same local account of the same source system more than once, either with two different group accounts or with the same group account repeated
 **When** the product is run
-**Then** the run stops with an error (not a gate result) that tells the Reviewer which source system and local account are ambiguous, because each local account of a source system maps to exactly one group account
+**Then** the run stops with an error (not a gate result) that tells the Reviewer which source system and local account are ambiguous, because each local account of a source system has exactly one row in the account mapping
 
 ### AC-12 (US-01) — authorization
 
 **Given** a Reviewer with a fresh clone and no accounts or credentials of any kind
 **When** the Reviewer runs the product
-**Then** the run succeeds using only the committed files, leaves the committed exports and account mapping unchanged, and every name and amount in them is fictitious, with the README next to the committed files and the committed file names stating that the data is synthetic
+**Then** the run succeeds using only the committed files, leaves every committed input file (both exports, the account mapping, the translation list and the exchange-rate file) unchanged, and every name and amount in them is fictitious, with the README next to the committed files and the name of each of these input files stating that the data is synthetic
 
 ### AC-13 (US-06) — cross-context
 
@@ -169,7 +169,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the next step needs an exchange rate for every transaction currency that is present
 **When** the Owner reads the product documentation of the aligned entries
-**Then** it lists every attribute of an aligned entry with its meaning, and the run summary lists exactly the transaction currencies that occur in the entries
+**Then** it lists every attribute of an aligned entry with its meaning (at least the identifier, source system, document, line, date, signed amount, transaction currency, local account, group account, description in the common language and original description), and the run summary lists exactly the transaction currencies that occur in the entries
 
 ## 6. Non-functional requirements
 
@@ -177,9 +177,9 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 |---|---|---|
 | Run time of the whole-repository run command (after the one-time setup) | ≤ 30 s on the CI runner | timed step in the CI log |
 | Accuracy of the completeness gate on clean data | 0 differences in entry count and in totals; amounts are held as fixed-precision decimals with 2 decimal places for EUR, GBP and USD and are never rounded (a value with more decimal places is unreadable, AC-09) | result of the completeness gate |
-| Reproducibility | 100%: two generations give byte-identical files, two runs give identical entry identifiers | test comparing file hashes and identifiers |
+| Reproducibility | 100%: a fresh generation gives files byte-identical to the committed ones and to a second fresh generation, two runs give identical entry identifiers | test comparing file hashes and identifiers |
 | Readability of inputs | 100 to 250 entries per export (target ≈ 150) | test on the size of the committed files |
-| Portability of product SQL | 0 constructs specific to one engine in the product SQL files, except reading the nested-record export and parsing the locale date and number formats, which live in one adapter folder per engine: `adapters/duckdb/` (local, used for development and CI) and `adapters/databricks/` (target, Databricks Free Edition); the SQL files contain no file-reading code | review checklist now; the duckdb adapter is tested in every build; the databricks adapter is verified manually on Free Edition at roadmap step 6 |
+| Portability of product SQL | 0 constructs specific to one engine in the product SQL files, except reading the nested-record export and parsing the locale date and number formats, which live in one adapter folder per engine: `products/unified_gl/adapters/duckdb/` (local, used for development and CI) and `products/unified_gl/adapters/databricks/` (target, Databricks Free Edition); the SQL files contain no file-reading code | review checklist now; the duckdb adapter is tested in every build; the databricks adapter is verified manually on Free Edition at roadmap step 6 |
 | Gate scenarios | 1 passing scenario for each of the 2 gates of this step (failing scenarios belong to step 4) | automated test suite |
 
 ## 6.1 Security / privacy
