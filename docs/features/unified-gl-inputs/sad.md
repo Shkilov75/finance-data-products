@@ -107,7 +107,7 @@ C4Context
 
 1. **Engine differences stay behind a view contract** — each engine adapter loads the raw files as they arrived, flattens the nested export and exposes flat views with fixed names and column types; the neutral product SQL starts from those views and never sees a date or number string. Serves Portability (§1 goal 3) and the no-guessing rule of AC-09. → feature ADR-0001.
 2. **The completeness gate has its own path to the raw data** — the raw side of the gate (counts, separate debit and credit totals, per-entry comparison) is computed by control views that parse the raw tables separately from the alignment, so a parsing defect cannot pass on both sides. Serves Completeness (§1 goal 1). → feature ADR-0002.
-3. **Broken keys and ambiguous mappings stop the run** — duplicate document and line, duplicate entry identifier and a local account mapped to two group accounts are declared as zero-row SQL invariant checks in the product manifest; the core raises a typed error and exits with a different code than a failed gate. Serves Completeness and Reproducibility (identifiers must be unique and stable). → feature ADR-0003.
+3. **Broken keys and ambiguous mappings stop the run** — duplicate document and line, duplicate entry identifier and a local account listed more than once in the account mapping are declared as zero-row SQL invariant checks in the product manifest; the core raises a typed error and exits with a different code than a failed gate. Serves Completeness and Reproducibility (identifiers must be unique and stable). → feature ADR-0003.
 4. **Products declare what to report, the core renders it** — the manifest names a summary query and the CSV exports; the core prints the table, the violating rows of a failed gate, the reserved products, and writes files only into `build/`. Serves the Reviewer's one-command experience (AC-01, AC-13) without copying output code into products. → feature ADR-0004.
 
 Inherited, not re-decided: Python and DuckDB with SQL files (repo ADR-0001), `products/<name>/` plus `src/fdp_core/` (repo ADR-0002), rebuilt layers with hash identifiers and no migration tool (repo ADR-0003), shared dialect-neutral SQL (repo ADR-0004). Each tactical decision in later sections should trace to one of these seeds or to those repository ADRs; a tactical decision that contradicts one is a red flag to surface in §11.
@@ -141,7 +141,7 @@ products/unified_gl/
 tests/unit/test_smoke.py   ~ drops the «0 gates run» expectation once unified_gl is active
 ```
 
-**Data flow.** The adapter loads the files into `raw` as they arrived (ERP A as text columns, ERP B still nested, plus the account mapping, the description translation list and `rates.csv`; the rates are loaded but not read in this step). It then exposes typed flat views and independent control views. The neutral SQL builds **`staging.ledger_entry`**: one row per accepted entry of either source system, with the source system, original document and line, the date, the signed amount in transaction currency (debit positive, credit negative), the local account, the group account, the description in the common language and a deterministic entry identifier (hash of source system, document and line).
+**Data flow.** The adapter loads the files into `raw` as they arrived (ERP A as text columns, ERP B still nested, plus the account mapping, the description translation list and `rates_synthetic.csv`; the rates are loaded but not read in this step). It then exposes typed flat views and independent control views. The neutral SQL builds **`staging.ledger_entry`**: one row per accepted entry of either source system, with the source system, original document and line, the date, the signed amount in transaction currency (debit positive, credit negative), the local account, the group account, the description in the common language and a deterministic entry identifier (hash of source system, document and line).
 
 **Rules of the aligned set** (stable contract for roadmap step 3; the attribute list is fixed by the `data-model` stage and documented per AC-14):
 - An entry that cannot be read (AC-09) is not in the set; the completeness gate reports it as lost.
@@ -292,7 +292,7 @@ sequenceDiagram
     D-->>S: one row per source system and transaction currency with entry count, debit total and credit total
     Note over S,D: the currency list comes from the aligned entries and never from the rates file (AC-14)
     S->>D: runs the exceptions report query
-    D-->>S: one row per description without translation with source system, document, line and original text
+    D-->>S: one row per aligned entry whose description has no translation, with source system, document, line and original text (AC-02, written even when empty)
     S->>O: writes the exceptions report and the gate report
     Note over S,O: persists exceptions report records and gate status with number of violating rows
     O-->>S: files written
@@ -462,7 +462,7 @@ The feature adds no infrastructure. It runs as one Python process with an embedd
 | ID strategy | `entry_id` = md5 hash of source system, document and line joined with a fixed separator; deterministic, available in DuckDB and Spark SQL; collisions are caught by the invariant check `unique entry id` | repo ADR-0003, ADR-0003 of this feature |
 | Money | Fixed-precision decimals with scale 2 for EUR, GBP and USD, never rounded; a value with more decimal places than its currency allows is unreadable (AC-09) | spec §6 |
 | Determinism of generated data | Fixed seed, amounts built from integer cents (no floating point), no timestamps, fixed row order and key order, LF line endings; checked by a file-hash test | spec §6 |
-| Input file formats | ERP A: flat delimited text (CSV). ERP B: one JSON file holding an array of document objects with a nested `lines` array. Account mapping, description translation list and `rates.csv`: CSV. All committed under `products/unified_gl/data/` with «synthetic» in the file names | ADR-0005, AC-12 |
+| Input file formats | ERP A: flat delimited text (CSV). ERP B: one JSON file holding an array of document objects with a nested `lines` array. Account mapping, description translation list and `rates_synthetic.csv`: CSV. All committed under `products/unified_gl/data/` with «synthetic» in the file names | ADR-0005, AC-12 |
 | Reference data | Account mapping, translation list and rates are committed files loaded into `raw` like the exports; the mapping is per source system | here |
 | Internationalisation | Descriptions are brought to one common language through the committed translation list, no external service; a description without a translation keeps its original text and is written to the exceptions report | AC-02 |
 | Traceability | Raw data is kept as it arrived; every aligned entry carries source system, document and line | AC-03, AC-04 |
