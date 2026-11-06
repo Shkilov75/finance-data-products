@@ -64,7 +64,7 @@ Environment: none. Working directory: any inside the repository (root is found f
 | Reads | `products/unified_gl/data/erp_a_export_synthetic.csv`, `erp_b_export_synthetic.json`, `account_mapping_synthetic.csv`, `description_translation_synthetic.csv`, `rates_synthetic.csv` | Opened read-only; never changed by a run |
 | Writes | `build/fdp.duckdb` | Rebuilt on every run |
 | Writes | `build/report.json` | Array of `{gate, status, violations}`; also written after a failed gate |
-| Writes | `build/unified_gl/exceptions_report.csv` | Header `source_system,document,line,original_description`; **always** written, header only when no record (AC-02); also written after a failed gate (SAD §1 override) |
+| Writes | `build/unified_gl/exceptions_report.csv` | Header `source_system,source_document,source_line,original_description`; **always** written, header only when no record (AC-02); also written after a failed gate (SAD §1 override) |
 | Writes | nothing else | In particular nothing under `products/` |
 
 Report files are deleted in phase 1 and written in phase 5. So after exit 0 and exit 1 the files are fresh from this run; after exit 2 and exit 3 (the run stops before phase 5) none exist, and no file of an earlier run is left.

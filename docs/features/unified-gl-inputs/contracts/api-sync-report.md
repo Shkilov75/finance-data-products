@@ -28,7 +28,7 @@ size: "M (from .size), route standard (from .route)"
 | completeness violating rows (system, currency, difference; system, document, line) | spec AC-08; data-model.md → `control_erp_*` | high |
 | mapping violating rows (system, local account) | spec AC-10; data-model.md → `staging.ledger_entry.group_account` | high |
 | `exceptions_report.csv` path `build/unified_gl/` | ADR-0004 (`build/<product>/`) | high |
-| `exceptions_report.csv` columns `source_system,document,line,original_description` | spec AC-02 lists the four values; header spelling is this contract's proposal | medium |
+| `exceptions_report.csv` columns `source_system,source_document,source_line,original_description` | spec AC-02 (after clarify, 2026-11-06): same names as `staging.ledger_entry` | high |
 | `exceptions_report.csv: <n> records` line | spec AC-01 («next to the report name») | high |
 | reserved product lines | spec AC-13; sad.md Flow 1 | high |
 | `build/report.json` entries `{gate, status, violations}` | existing `runner.run`; sad.md §7 | high |
@@ -40,7 +40,7 @@ size: "M (from .size), route standard (from .route)"
 | generated file names | data-model.md (entities), spec AC-05, AC-12 | high |
 | `staging.ledger_entry` attributes | data-model.md (all 11 columns) | high |
 
-Two `low`/`medium` rows are declared incompleteness: the generator write-failure exit and the CSV header spelling. Both are tightened by `--reconcile` or by `tasks`.
+One `low` row is declared incompleteness: the generator write-failure exit (the CSV header became `high` after clarify, 2026-11-06). It is tightened by `--reconcile` or by `tasks`.
 
 ## Section B — drift findings
 
@@ -76,7 +76,7 @@ Five flags were raised (F1–F3, N1, N2; ≥3 pauses the run); three were resolv
 
 | # | Question | Owner | Due |
 |---|---|---|---|
-| OQ-1 | Confirm the CSV header spelling of `exceptions_report.csv` (`source_system,document,line,original_description`) | `tasks` | before the exceptions-report task starts |
+| OQ-1 | ~~Confirm the CSV header spelling of `exceptions_report.csv`~~ **Closed 2026-11-06**: spec AC-02 fixes `source_system,source_document,source_line,original_description` | — | — |
 | OQ-2 | Wrap non-`FdpError` file-reading failures into exit 3 (N1) | `implement` | with the runner task |
 
 ## Requirements for `tasks` and `implement` (stale reports, 2026-11-06)

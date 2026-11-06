@@ -44,7 +44,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 ### US-01: Generate reproducible exports
 
 **As an** Owner
-**I want** to generate both ERP exports, the account mapping and the exchange-rate file from a fixed seed, at a small readable size
+**I want** to generate both ERP exports, the account mapping, the description translation list and the exchange-rate file from a fixed seed, at a small readable size
 **So that** every checkout has identical input data
 
 ### US-02: See what each source delivered
@@ -97,7 +97,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** the entries of both exports are loaded
 **When** the Reviewer looks at the aligned entries
-**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A a debit or credit cell is filled when it is not empty (a cell holding zero counts as filled), and exactly one of the two is filled, with a number greater than zero, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is written to the exceptions report (`exceptions_report.csv`), one record per aligned entry whose description has no translation, with source system, document, line and original description, written to the build area on every run (with only its header when there is no such entry); a description is translated only when its whole text equals an entry of the translation list exactly (no word-level or case-insensitive matching), and the common language is English; missing exchange rates and reconciliation differences are not part of this report (rates belong to step 3, differences are reported by the completeness gate, AC-08)
+**Then** every entry from either source system shows the same attributes under the same names, with its description in one common language (a fixed, committed translation list, no external service), a real calendar date, a numeric amount, and one signed amount in which a debit is positive and a credit is negative, regardless of how its source wrote dates, numbers, debits and credits; in ERP A a debit or credit cell is filled when it is not empty (a cell holding zero counts as filled), and exactly one of the two is filled, with a number greater than zero, and in ERP B a positive amount is a debit and a negative amount is a credit; a description that has no entry in the translation list keeps its original text, its entry stays among the aligned entries (it is not an AC-09 case), and the description is written to the exceptions report (`exceptions_report.csv`), one record per aligned entry whose description has no translation, with the columns `source_system`, `source_document`, `source_line` and `original_description` (the same names as in the aligned entries), written to the build area on every run (with only its header when there is no such entry); a description is translated only when its whole text equals an entry of the translation list exactly (no word-level or case-insensitive matching), and the common language is English; missing exchange rates and reconciliation differences are not part of this report (rates belong to step 3, differences are reported by the completeness gate, AC-08)
 
 ### AC-03 (US-04) — happy path
 
@@ -113,7 +113,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ### AC-05 (US-01) — happy path
 
-**Given** the Owner generates the exports, the account mapping and the exchange-rate file (`rates_synthetic.csv` in the product's data folder, with the columns date, currency and rate_to_usd) with the fixed seed
+**Given** the Owner generates the exports, the account mapping, the description translation list (`description_translation_synthetic.csv` in the product's data folder) and the exchange-rate file (`rates_synthetic.csv` in the product's data folder, with the columns date, currency and rate_to_usd) with the fixed seed
 **When** the Owner generates them a second time
 **Then** the files are identical to the first time, each export holds between 100 and 250 entries (target about 150), all dated within the first quarter of 2026 (January to March), both exports carry an explicit document number and line number for every entry, the two exports together use at least EUR, GBP and USD as transaction currencies, and every document is posted in one transaction currency and balances: its debits equal its credits, and the rate file holds exactly one rate to USD for each transaction currency that occurs in the exports (USD included, with the rate 1) on every calendar day from 2026-01-01 to 2026-03-31
 
@@ -121,7 +121,7 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 **Given** aligned entries from both source systems, including two entries of one document that share date, account and amount, and both exports carry an explicit document number and line number for every entry
 **When** the Owner runs the product twice
-**Then** every entry has an identifier derived from source system, document and line (the three values in this order, as written in the source apart from trimmed spaces, joined by a fixed separator), the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier, or one export held the same document and line twice (checked on the raw records of each export before any readability rule is applied, so an unreadable duplicate also stops the run), the run would stop with an error that names the source system, document and line (an error, not a gate result)
+**Then** every entry has an identifier derived from source system, document and line (the three values in this order, as written in the source apart from trimmed spaces, joined by a fixed separator; the line takes part as a whole number, so «01» and «1» give the same identifier, while the document is taken as written in the source with trimmed spaces only), the identifiers are unique across both source systems, each entry keeps the same identifier in both runs, and if two entries ever shared an identifier, or one export held the same document and line twice (checked on the raw records of each export before any readability rule is applied, so an unreadable duplicate also stops the run), the run would stop with an error that names the source system, document and line (an error, not a gate result)
 
 ### AC-07 (US-06) — happy path
 

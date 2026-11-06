@@ -167,7 +167,7 @@ Created in neutral SQL (`products/unified_gl/sql/staging/`), one row per accepte
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
-| `entry_id` | VARCHAR | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06) |
+| `entry_id` | VARCHAR | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06); `source_line` is hashed as an integer, so «01» and «1» give the same identifier, the document as written in the source with trimmed spaces |
 | `source_system` | VARCHAR | NOT NULL | `ERP_A` or `ERP_B` (US-04) |
 | `source_document` | VARCHAR | NOT NULL | original document number (US-04) |
 | `source_line` | INTEGER | NOT NULL | original line number (US-04) |
