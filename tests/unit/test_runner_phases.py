@@ -1,35 +1,10 @@
 import json
 
 import pytest
+from helpers import make_product
 
 from fdp_core import runner
-from fdp_core.config import Config
 from fdp_core.errors import FdpError, InvariantViolation
-
-
-def make_product(root, *, invariants=(), gates=("gates/01_g.sql",), sql=("sql/a.sql",), files=None,
-                 extra_manifest=""):
-    prod = root / "products" / "demo"
-    for sub in ("sql", "gates", "invariants", "adapters/duckdb"):
-        (prod / sub).mkdir(parents=True, exist_ok=True)
-    defaults = {
-        "sql/a.sql": "CREATE TABLE staging.t AS SELECT 1 AS x;",
-        "gates/01_g.sql": "SELECT * FROM staging.t WHERE x = 0;",
-        "invariants/ok.sql": "SELECT * FROM staging.t WHERE x = 0;",
-        "invariants/bad.sql": "SELECT 'DOC1' AS document, 3 AS line FROM staging.t;",
-        "invariants/bad2.sql": "CREATE TABLE staging.second_ran AS SELECT 1 AS x;"
-                               " SELECT 'x' AS y FROM staging.t;",
-        "adapters/duckdb/load.sql": "CREATE TABLE raw.loaded AS SELECT 7 AS v;",
-    }
-    defaults.update(files or {})
-    for rel, text in defaults.items():
-        (prod / rel).write_text(text)
-    q = lambda xs: "[" + ", ".join(f'"{x}"' for x in xs) + "]"
-    (prod / "product.toml").write_text(
-        'name = "demo"\nstatus = "active"\n'
-        f"sql = {q(sql)}\ninvariants = {q(invariants)}\ngates = {q(gates)}\n{extra_manifest}"
-    )
-    return Config(root=root)
 
 
 def test_invariant_with_rows_raises_and_names_rows(tmp_path):
@@ -57,7 +32,7 @@ def test_invariant_failure_runs_before_gates_and_stops_later_invariants(tmp_path
 
 def test_zero_row_invariant_lets_gates_run(tmp_path):
     cfg = make_product(tmp_path, invariants=["invariants/ok.sql"])
-    results = runner.run(cfg)
+    results = runner.run(cfg).gates
     assert [r.name for r in results] == ["01_g"]
     assert cfg.report_path.exists()
 
@@ -69,7 +44,7 @@ def test_manifest_without_new_keys_still_works(tmp_path):
     )
     product = runner.discover_products(cfg)[0]
     assert product.invariants == [] and product.summary is None and product.exports == []
-    assert [r.status for r in runner.run(cfg)] == ["PASS"]
+    assert [r.status for r in runner.run(cfg).gates] == ["PASS"]
 
 
 def test_engine_placeholder_replaced(tmp_path):

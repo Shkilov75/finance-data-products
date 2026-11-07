@@ -9,6 +9,7 @@ import duckdb
 from fdp_core.config import LAYERS, Config
 from fdp_core.errors import InvariantViolation, LayerBuildError, ManifestError
 from fdp_core.gates import FAIL, GateResult, run_sql_gate
+from fdp_core.report import write_csv
 
 
 @dataclass
@@ -61,33 +62,58 @@ def _read(cfg: Config, product: Product, rel: str) -> str:
     return (product.path / rel.replace("{engine}", cfg.engine)).read_text()
 
 
-def run(cfg: Config) -> list[GateResult]:
+@dataclass
+class RunResult:
+    gates: list[GateResult] = field(default_factory=list)
+    summaries: list[tuple[list[str], list[tuple]]] = field(default_factory=list)
+    exports: list[tuple[str, int]] = field(default_factory=list)  # (file name, record count)
+    reserved: list[str] = field(default_factory=list)
+    gated_products: list[str] = field(default_factory=list)
+
+
+def _query(con: duckdb.DuckDBPyConnection, sql: str) -> tuple[list[str], list[tuple]]:
+    cur = con.execute(sql)
+    return [d[0] for d in cur.description], cur.fetchall()
+
+
+def run(cfg: Config) -> RunResult:
     products = discover_products(cfg)
     con = build_layers(cfg, products)
-    results: list[GateResult] = []
-    for product in products:
-        if product.status != "active":
-            continue
-        for rel in product.sql:
-            try:
-                con.execute(_read(cfg, product, rel))
-            except duckdb.Error as exc:
-                raise LayerBuildError(f"{product.name}/{rel}: {exc}") from exc
-        for rel in product.invariants:
-            rows = con.execute(_read(cfg, product, rel)).fetchall()
-            if rows:
-                con.close()
-                raise InvariantViolation(f"{product.name}/{rel}", rows)
-        results += [
-            run_sql_gate(con, product.path / rel.replace("{engine}", cfg.engine))
-            for rel in product.gates
-        ]
-    con.close()
+    result = RunResult(reserved=sorted(p.name for p in products if p.status == "reserved"))
+    active = [p for p in products if p.status == "active"]
+    try:
+        for product in active:
+            for rel in product.sql:
+                try:
+                    con.execute(_read(cfg, product, rel))
+                except duckdb.Error as exc:
+                    raise LayerBuildError(f"{product.name}/{rel}: {exc}") from exc
+            for rel in product.invariants:
+                rows = con.execute(_read(cfg, product, rel)).fetchall()
+                if rows:
+                    raise InvariantViolation(f"{product.name}/{rel}", rows)
+            result.gates += [
+                run_sql_gate(con, product.path / rel.replace("{engine}", cfg.engine))
+                for rel in product.gates
+            ]
+            if product.gates:
+                result.gated_products.append(product.name)
+        for product in active:  # phase 5: summary and exports
+            if product.summary:
+                result.summaries.append(_query(con, _read(cfg, product, product.summary)))
+            for export in product.exports:
+                columns, rows = _query(con, _read(cfg, product, export["query"]))
+                write_csv(cfg.product_build_dir(product.name) / export["file"], columns, rows)
+                result.exports.append((export["file"], len(rows)))
+    finally:
+        con.close()
     cfg.report_path.write_text(json.dumps(
-        [{"gate": r.name, "status": r.status, "violations": len(r.violations)} for r in results],
+        [{"gate": r.name, "status": r.status, "violations": len(r.violations)}
+         for r in result.gates],
         indent=2))
-    return results
+    return result
 
 
-def exit_code(results: list[GateResult]) -> int:
-    return 1 if any(r.status == FAIL for r in results) else 0
+def exit_code(results: "RunResult | list[GateResult]") -> int:
+    gates = results.gates if isinstance(results, RunResult) else results
+    return 1 if any(r.status == FAIL for r in gates) else 0

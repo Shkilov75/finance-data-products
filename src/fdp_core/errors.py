@@ -18,3 +18,12 @@ class InvariantViolation(FdpError):
         self.rows = rows
         listing = "\n".join(f"  {row}" for row in rows)
         super().__init__(f"invariant {invariant} violated by {len(rows)} row(s):\n{listing}")
+
+    @property
+    def label(self) -> str:
+        """Readable name from the file: ``invariants/01_unique_entry_id.sql`` -> unique entry id."""
+        stem = self.invariant.rsplit("/", 1)[-1].removesuffix(".sql")
+        words = stem.split("_")
+        if words and words[0].isdigit():
+            words = words[1:]
+        return " ".join(words)

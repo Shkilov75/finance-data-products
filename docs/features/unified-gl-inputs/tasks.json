@@ -40,7 +40,7 @@
         "tests/unit/test_report_cli.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/core-report-cli.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T3",

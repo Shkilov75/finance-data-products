@@ -9,7 +9,7 @@
 | # | Task | Layer | Owner | Estimate | Blocked by | Status | Step |
 |---|---|---|---|---|---|---|---|
 | T1 | Extend the runner with manifest keys, clean start, invariant phase and InvariantViolation | app | maksym.shkilov@gmail.com | M | — | done | COMMIT |
-| T2 | Add report.py and extend the CLI: summary table, violating rows, exceptions line, reserved products, exit codes 2 and 3 | ports | maksym.shkilov@gmail.com | M | T1 | todo | — |
+| T2 | Add report.py and extend the CLI: summary table, violating rows, exceptions line, reserved products, exit codes 2 and 3 | ports | maksym.shkilov@gmail.com | M | T1 | done | COMMIT |
 | T3 | Write the seeded data generator and commit the five synthetic input files | infra | maksym.shkilov@gmail.com | L | — | todo | — |
 | T4 | Test the committed inputs: reproducibility hash, size, quarter, keys, balance, currencies, daily rates, synthetic names | tests | maksym.shkilov@gmail.com | S | T3 | todo | — |
 | T5 | Create the DuckDB adapter files: raw load of the five inputs and the typed views | migration | maksym.shkilov@gmail.com | M | T3 | todo | — |
