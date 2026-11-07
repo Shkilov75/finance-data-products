@@ -186,7 +186,7 @@
         "tests/unit/test_gates.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/gates-completeness-mapping.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T10",
