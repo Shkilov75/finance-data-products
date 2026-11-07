@@ -98,7 +98,7 @@
         "tests/unit/test_adapter_duckdb.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/adapter-raw-typed.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T6",

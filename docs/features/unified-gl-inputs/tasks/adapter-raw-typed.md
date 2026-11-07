@@ -9,8 +9,8 @@ files_hint: ["docs/features/unified-gl-inputs/migrations/01_create_raw_inputs.up
 owner: "maksym.shkilov@gmail.com"
 estimate: "M"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.

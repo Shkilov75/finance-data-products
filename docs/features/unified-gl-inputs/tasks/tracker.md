@@ -12,7 +12,7 @@
 | T2 | Add report.py and extend the CLI: summary table, violating rows, exceptions line, reserved products, exit codes 2 and 3 | ports | maksym.shkilov@gmail.com | M | T1 | done | COMMIT |
 | T3 | Write the seeded data generator and commit the five synthetic input files | infra | maksym.shkilov@gmail.com | L | — | done | COMMIT |
 | T4 | Test the committed inputs: reproducibility hash, size, quarter, keys, balance, currencies, daily rates, synthetic names | tests | maksym.shkilov@gmail.com | S | T3 | done | COMMIT |
-| T5 | Create the DuckDB adapter files: raw load of the five inputs and the typed views | migration | maksym.shkilov@gmail.com | M | T3 | todo | — |
+| T5 | Create the DuckDB adapter files: raw load of the five inputs and the typed views | migration | maksym.shkilov@gmail.com | M | T3 | done | COMMIT |
 | T6 | Create the control views (independent raw side of the completeness gate) | migration | maksym.shkilov@gmail.com | S | T5 | todo | — |
 | T7 | Create staging.ledger_entry: the aligned entry set (neutral SQL) | migration | maksym.shkilov@gmail.com | M | T5 | todo | — |
 | T8 | Write the three invariant SQL checks: unique document and line, unique entry id, unambiguous mapping | domain | maksym.shkilov@gmail.com | S | T1, T6, T7 | todo | — |
