@@ -18,7 +18,7 @@
         "tests/unit/test_runner_phases.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/core-runner-phases.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T2",
