@@ -163,7 +163,7 @@
         "tests/unit/test_invariants.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/invariant-checks.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T9",

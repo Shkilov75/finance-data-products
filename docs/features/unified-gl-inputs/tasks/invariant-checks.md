@@ -9,8 +9,8 @@ files_hint: ["products/unified_gl/invariants/", "tests/unit/test_invariants.py"]
 owner: "maksym.shkilov@gmail.com"
 estimate: "S"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.
