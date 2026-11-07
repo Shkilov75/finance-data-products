@@ -1,3 +1,4 @@
+import contextlib
 import json
 import shutil
 import tomllib
@@ -77,6 +78,12 @@ def _query(con: duckdb.DuckDBPyConnection, sql: str) -> tuple[list[str], list[tu
 
 
 def run(cfg: Config) -> RunResult:
+    # Engine files read inputs by paths relative to the repository root.
+    with contextlib.chdir(cfg.root):
+        return _run(cfg)
+
+
+def _run(cfg: Config) -> RunResult:
     products = discover_products(cfg)
     con = build_layers(cfg, products)
     result = RunResult(reserved=sorted(p.name for p in products if p.status == "reserved"))

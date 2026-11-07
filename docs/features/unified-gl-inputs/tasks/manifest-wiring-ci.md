@@ -9,8 +9,8 @@ files_hint: ["products/unified_gl/product.toml", "tests/unit/test_smoke.py", ".g
 owner: "maksym.shkilov@gmail.com"
 estimate: "S"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.

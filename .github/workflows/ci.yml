@@ -11,3 +11,10 @@ jobs:
       - run: make setup
       - run: make lint
       - run: make test
+      - name: Timed whole-repository run (budget 30 s)
+        run: |
+          start=$(date +%s)
+          make run
+          elapsed=$(( $(date +%s) - start ))
+          echo "make run took ${elapsed}s"
+          if [ "$elapsed" -gt 30 ]; then echo "over the 30 s budget"; exit 1; fi

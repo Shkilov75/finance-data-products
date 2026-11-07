@@ -1,4 +1,34 @@
 name = "unified_gl"
-status = "reserved"   # becomes "active" when the product is implemented
-sql = []              # layer SQL files in execution order, relative to this folder
-gates = []            # gate SQL files in execution order, relative to this folder
+status = "active"
+
+# Layer SQL in execution order, relative to this folder: engine files first ({engine} is replaced
+# by the engine name, default duckdb), then the neutral SQL.
+sql = [
+  "adapters/{engine}/01_create_raw_inputs.sql",
+  "adapters/{engine}/02_create_typed_views.sql",
+  "adapters/{engine}/03_create_control_views.sql",
+  "sql/staging/04_create_staging_ledger_entry.sql",
+]
+
+# Zero-row checks run before the gates; a returned row stops the run (exit 2).
+# Order matters: a repeated mapping row fans out the staging join and would otherwise be
+# reported as a repeated entry_id, so the mapping check runs before the entry-id check.
+invariants = [
+  "invariants/01_unique_document_and_line.sql",
+  "invariants/02_unambiguous_mapping.sql",
+  "invariants/03_unique_entry_id.sql",
+]
+
+# Zero rows = PASS; a failed gate does not stop the run (exit 1).
+gates = [
+  "gates/01_completeness.sql",
+  "gates/02_mapping.sql",
+]
+
+# Printed by the core as the summary table.
+summary = "reports/summary.sql"
+
+# Each query is written by the core as CSV into build/unified_gl/.
+[[exports]]
+query = "reports/exceptions_report.sql"
+file = "exceptions_report.csv"

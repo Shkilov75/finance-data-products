@@ -236,7 +236,7 @@
         "products/unified_gl/data/.gitkeep"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/manifest-wiring-ci.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T12",
