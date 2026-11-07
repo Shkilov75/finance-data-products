@@ -142,7 +142,7 @@
         "tests/unit/test_ledger_entry.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/staging-ledger-entry.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T8",
