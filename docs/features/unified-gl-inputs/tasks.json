@@ -75,7 +75,7 @@
         "tests/unit/test_inputs.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/input-checks-tests.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T5",
