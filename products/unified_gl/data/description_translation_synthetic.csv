@@ -1,0 +1,21 @@
+source_system,original_description,common_description
+ERP_A,Büromaterial Einkauf,Office supplies purchase
+ERP_A,Miete Bürogebäude,Office building rent
+ERP_A,Reisekosten Außendienst,Field sales travel costs
+ERP_A,Eingangsrechnung Lieferant,Supplier invoice received
+ERP_A,Ausgangsrechnung Kunde,Customer invoice issued
+ERP_A,Bankgebühren Quartal,Bank fees for the quarter
+ERP_A,Gehälter Monatslauf,Monthly payroll run
+ERP_A,Softwarelizenz Jahresgebühr,Annual software license fee
+ERP_A,Marketingkampagne Frühjahr,Spring marketing campaign
+ERP_A,Zahlung Kunde,Customer payment
+ERP_B,Office supplies,Office supplies
+ERP_B,Warehouse rent,Warehouse rent
+ERP_B,Sales trip expenses,Sales trip expenses
+ERP_B,Vendor invoice,Vendor invoice
+ERP_B,Client invoice,Client invoice
+ERP_B,Bank charges,Bank charges
+ERP_B,Payroll run,Payroll run
+ERP_B,Software subscription,Software subscription
+ERP_B,Advertising campaign,Advertising campaign
+ERP_B,Client payment,Client payment
