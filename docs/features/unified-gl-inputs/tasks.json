@@ -281,7 +281,7 @@
         "tests/integration/conftest.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/e2e-tests.md",
-      "status": "todo"
+      "status": "done"
     }
   ]
 }
