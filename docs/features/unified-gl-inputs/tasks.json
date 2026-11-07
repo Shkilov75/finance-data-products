@@ -119,7 +119,7 @@
         "tests/unit/test_control_views.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/adapter-control-views.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T7",

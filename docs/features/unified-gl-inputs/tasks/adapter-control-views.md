@@ -9,8 +9,8 @@ files_hint: ["docs/features/unified-gl-inputs/migrations/03_create_control_views
 owner: "maksym.shkilov@gmail.com"
 estimate: "S"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.
