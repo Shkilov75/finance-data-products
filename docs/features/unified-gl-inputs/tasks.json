@@ -207,7 +207,7 @@
         "tests/unit/test_reports_sql.py"
       ],
       "file": "docs/features/unified-gl-inputs/tasks/report-queries.md",
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T11",
