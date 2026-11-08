@@ -818,7 +818,7 @@
         "tests/unit/test_runner_phases.py",
         "docs/features/unified-gl-inputs/contracts/cli.md"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T42",

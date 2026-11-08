@@ -68,6 +68,10 @@ def _parse_manifest(manifest: Path) -> Product:
         raise ManifestError(f"{manifest}: missing field {exc}") from exc
     if not isinstance(product.name, str) or not NAME_PATTERN.fullmatch(product.name):
         raise ManifestError(f"{manifest}: name {product.name!r} must match [a-z0-9_]+")
+    if product.name != manifest.parent.name:  # clean start and exports must name one build folder
+        raise ManifestError(
+            f"{manifest}: name {product.name!r} must equal the product folder name "
+            f"{manifest.parent.name!r}")
     if product.status not in STATUSES:
         raise ManifestError(
             f"{manifest}: status {product.status!r} must be one of {', '.join(STATUSES)}")

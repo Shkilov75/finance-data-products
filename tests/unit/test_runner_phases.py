@@ -449,3 +449,26 @@ def test_a_nul_in_a_reserved_manifest_does_not_keep_stale_files_of_an_active_pro
     with pytest.raises(ManifestError, match=r"aaa/product\.toml"):
         runner.run(cfg)
     assert not stale.exists()
+
+
+# --- review 2026-11-07 round 4, I5: the product name is the name of its folder ----------------
+
+def test_a_name_that_differs_from_the_folder_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").write_text('name = "other"\nstatus = "active"\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*other.*folder"):
+        runner.discover_products(cfg)
+
+
+def test_a_misnamed_active_product_cannot_leave_its_exports_behind(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, name="folder_x", exports=[("reports/exceptions.sql", "out.csv")])
+    runner.run(cfg)
+    assert (tmp_path / "build/folder_x/out.csv").is_file()
+    (tmp_path / "products/folder_x/product.toml").write_text(
+        'name = "prod_y"\nstatus = "active"\n[[exports]]\nquery = "reports/exceptions.sql"\nfile = "out.csv"\n')
+    with pytest.raises(ManifestError, match="folder"):
+        runner.run(cfg)
+    assert not (tmp_path / "build/folder_x").exists()
+    assert not (tmp_path / "build/prod_y").exists()

@@ -151,7 +151,7 @@ After exit 2 or exit 3 no report file exists: neither `build/report.json` nor `b
 | Same original description twice in the translation list | 2 | AC-02, AC-06 | 1 |
 | Same `entry_id` twice | 2 | AC-06 | 1, 7 |
 | Same local account twice in the mapping (same or different group account) | 2 | AC-11 | 1 |
-| Layer SQL file fails, manifest key missing, unknown or malformed, file not UTF-8 (the message names `product.toml`), a path that leaves the product folder (checked again with the real engine name, so a symlinked engine folder cannot lead out), an export `file` that is not a plain file name or is listed twice | 3 | SAD §8, AC-12 | 1 |
+| Layer SQL file fails, manifest key missing, unknown or malformed, file not UTF-8 (the message names `product.toml`), a path that leaves the product folder (checked again with the real engine name, so a symlinked engine folder cannot lead out), an export `file` that is not a plain file name or is listed twice (ignoring case), a `name` that differs from the product folder, a path that cannot be resolved | 3 | SAD §8, AC-12 | 1 |
 
 ### 3.6 Idempotency
 
@@ -193,7 +193,7 @@ Only the generator writes the input files; a product run opens them read-only (A
 | `summary` | path | one query printed as the summary table |
 | `exports` | list of `{query, file}` | each query written by the core as CSV into `build/<product>/`; `file` is a plain file name (letters, digits, `_`, `.`, `-`), never a path |
 
-Every path in `sql`, `invariants`, `gates`, `summary` and `exports[].query` stays inside the product's own folder (products never share SQL); `sql`, `gates` and `invariants` are lists of strings. A violation is a manifest error: exit 3, the message names the `product.toml`. The clean start (§3.1 phase 1) removes `build/<product>/` of every product except one whose manifest says `reserved`; a file or symlink in its place is removed, never followed. A key that is not listed in the table (for example a misspelled `invariant`), in the product or in an `exports` table, is a manifest error, so a phase can never be switched off silently; every `exports[].file` is unique within a product. The manifest is read as UTF-8. Summary and export queries all run first and the CSV files are written only after every one of them succeeded, so exit 3 leaves no export of this run.
+Every path in `sql`, `invariants`, `gates`, `summary` and `exports[].query` stays inside the product's own folder (products never share SQL); `sql`, `gates` and `invariants` are lists of strings. A violation is a manifest error: exit 3, the message names the `product.toml`. The clean start (§3.1 phase 1) removes `build/<product>/` of every product except one whose manifest says `reserved`; a file or symlink in its place is removed, never followed. A key that is not listed in the table (for example a misspelled `invariant`), in the product or in an `exports` table, is a manifest error, so a phase can never be switched off silently; every `exports[].file` is unique within a product, ignoring upper/lower case (two names of one file on a case-insensitive file system); the product `name` equals the name of its folder, so the clean start and the exports always name the same `build/<product>/` and no two products share one. The manifest is read as UTF-8. Summary and export queries all run first and the CSV files are written only after every one of them succeeded, so exit 3 leaves no export of this run.
 
 ## 7. Data contract — the aligned entry set
 
