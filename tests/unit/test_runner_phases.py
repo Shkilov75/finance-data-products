@@ -303,3 +303,30 @@ def test_unreadable_reserved_manifest_does_not_keep_stale_files_of_an_active_pro
     with pytest.raises(ManifestError, match=r"(aaa|zzz)_bad/product\.toml"):
         runner.run(cfg)
     assert not stale.exists()
+
+
+# --- review 2026-11-07 round 3, H7: a misspelled key must not switch a phase off -------------
+
+@pytest.mark.parametrize("extra", ['invariant = ["invariants/bad.sql"]\n', 'gate = []\n', "description = 1\n"])
+def test_unknown_top_level_manifest_key_is_a_manifest_error(tmp_path, extra):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, manifest_extra=extra)
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*unknown key"):
+        runner.discover_products(cfg)
+
+
+def test_unknown_key_in_an_export_table_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, manifest_extra=(
+        '[[exports]]\nquery = "reports/exceptions.sql"\nfile = "x.csv"\nfiles = "y.csv"\n'))
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*unknown key.*files"):
+        runner.discover_products(cfg)
+
+
+def test_two_exports_with_the_same_file_name_are_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "x.csv"),
+                                          ("reports/summary.sql", "x.csv")])
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*x\.csv.*twice"):
+        runner.run(cfg)
+    assert not cfg.db_path.exists()

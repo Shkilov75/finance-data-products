@@ -40,7 +40,7 @@
 | T30 | Review H2: invariant messages survive an empty source_system | domain | maksym.shkilov@gmail.com | S | T29 | done | COMMIT |
 | T31 | Review H3: whitespace-only line number prints as ? in gate and invariant messages | domain | maksym.shkilov@gmail.com | S | T30 | done | COMMIT |
 | T32 | Review H6: non-UTF-8 manifest is a named ManifestError and cannot leave stale outputs | app | maksym.shkilov@gmail.com | S | T31 | done | COMMIT |
-| T33 | Review H7: reject unknown manifest keys and repeated export file names | app | maksym.shkilov@gmail.com | S | T32 | todo | SELECT |
+| T33 | Review H7: reject unknown manifest keys and repeated export file names | app | maksym.shkilov@gmail.com | S | T32 | done | COMMIT |
 | T34 | Review H5: path confinement checks the path that is read when {engine} is used | app | maksym.shkilov@gmail.com | S | T33 | todo | SELECT |
 | T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | todo | SELECT |
 | T36 | Review H1: close the surviving test mutants of the F1-F3/G2 fixes | tests | maksym.shkilov@gmail.com | S | T35 | todo | SELECT |

@@ -16,6 +16,8 @@ from fdp_core.report import write_csv
 NAME_PATTERN = re.compile(r"[a-z0-9_]+")
 EXPORT_FILE_PATTERN = re.compile(r"[A-Za-z0-9_.-]+")
 STATUSES = ("active", "reserved")
+MANIFEST_KEYS = {"name", "status", "sql", "gates", "invariants", "summary", "exports"}
+EXPORT_KEYS = {"query", "file"}
 
 
 @dataclass
@@ -44,6 +46,9 @@ def _parse_manifest(manifest: Path) -> Product:
         data = tomllib.loads(manifest.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
         raise ManifestError(f"{manifest}: {exc}") from exc
+    unknown = sorted(set(data) - MANIFEST_KEYS)
+    if unknown:  # a misspelled key would silently switch a phase off
+        raise ManifestError(f"{manifest}: unknown key {', '.join(map(repr, unknown))}")
     try:
         product = Product(
             name=data["name"],
@@ -72,10 +77,14 @@ def _parse_manifest(manifest: Path) -> Product:
         _check_inside(manifest, product, product.summary, "summary")
     if not isinstance(product.exports, list) or not all(isinstance(e, dict) for e in product.exports):
         raise ManifestError(f"{manifest}: exports must be a list of tables")
+    files_seen: set[str] = set()
     for export in product.exports:
         for key in ("query", "file"):
             if key not in export:
                 raise ManifestError(f"{manifest}: export without {key!r}")
+        unknown = sorted(set(export) - EXPORT_KEYS)
+        if unknown:
+            raise ManifestError(f"{manifest}: unknown key {', '.join(map(repr, unknown))} in exports")
         _check_inside(manifest, product, export["query"], "export query")
         name = export["file"]
         if (not isinstance(name, str) or not EXPORT_FILE_PATTERN.fullmatch(name)
@@ -83,6 +92,9 @@ def _parse_manifest(manifest: Path) -> Product:
             raise ManifestError(
                 f"{manifest}: export file {name!r} must be a plain file name "
                 f"(letters, digits, _ . -), written into build/{product.name}")
+        if name in files_seen:
+            raise ManifestError(f"{manifest}: export file {name!r} is listed twice")
+        files_seen.add(name)
     return product
 
 
