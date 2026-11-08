@@ -496,7 +496,7 @@
         "tests/unit/test_ledger_entry.py",
         "tests/unit/test_reports_sql.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T25",

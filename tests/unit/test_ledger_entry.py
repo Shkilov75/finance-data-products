@@ -197,3 +197,20 @@ def test_two_entries_of_one_document_with_equal_date_account_and_amount_keep_dis
         assert pair[0][4:9] == pair[1][4:9]          # same date, amount, currency, account, group
         assert pair[0][0] != pair[1][0]              # but different identifiers
     assert len({r[0] for r in entries}) == 4
+
+
+# --- review 2026-11-07 round 2, G3 (and G2 c): a blank translation target is untranslated ----
+
+@pytest.mark.parametrize("target", ["", " ", "   "])
+def test_blank_translation_target_keeps_the_original_description_and_is_reported(con, target):
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("INSERT INTO raw.erp_a_export VALUES "
+                "('BA-1','1','06.01.2026','4710','10,00','','EUR','Miete Bürogebäude')")
+    con.execute("UPDATE raw.description_translation SET common_description = ? "
+                "WHERE original_description = 'Miete Bürogebäude'", [target])
+    build(con)
+    entry = rows(con)[0]
+    assert entry[9] == "Miete Bürogebäude"      # not blank: the original text stays
+    assert entry[10] == "Miete Bürogebäude"
+    listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
+    assert [r[3] for r in listed] == ["Miete Bürogebäude"]

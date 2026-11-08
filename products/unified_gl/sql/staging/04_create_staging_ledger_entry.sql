@@ -47,7 +47,7 @@ SELECT
     r.currency,
     r.local_account,
     m.group_account,
-    coalesce(nullif(t.common_description, ''), r.description),
+    CASE WHEN trim(t.common_description) <> '' THEN t.common_description ELSE r.description END,
     r.description
 FROM readable AS r
 LEFT JOIN raw.account_mapping AS m

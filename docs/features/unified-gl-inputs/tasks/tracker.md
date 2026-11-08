@@ -31,7 +31,7 @@
 | T21 | Review G1: export file must be a non-empty bare name; clean start removes a file or symlink in place of build/<product> | app | maksym.shkilov@gmail.com | S | T20 | done | COMMIT |
 | T22 | Review G6: clean start leaves build folders of reserved products alone | app | maksym.shkilov@gmail.com | S | T21 | done | COMMIT |
 | T23 | Review G7: manifest errors name the file; list types validated; SQL paths confined to the product folder | app | maksym.shkilov@gmail.com | S | T22 | done | COMMIT |
-| T24 | Review G3: blank translation target counts as untranslated | domain | maksym.shkilov@gmail.com | S | T20 | todo | — |
+| T24 | Review G3: blank translation target counts as untranslated | domain | maksym.shkilov@gmail.com | S | T20 | done | COMMIT |
 | T25 | Review G4: completeness gate prints an unreadable line as written | domain | maksym.shkilov@gmail.com | S | T24 | todo | — |
 | T26 | Review G5: invariant messages survive an empty key | domain | maksym.shkilov@gmail.com | S | T25 | todo | — |
 | T27 | Review G9: invariant file numbers follow the execution order | domain | maksym.shkilov@gmail.com | S | T26 | todo | — |
