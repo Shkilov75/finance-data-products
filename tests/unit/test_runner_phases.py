@@ -156,3 +156,45 @@ def test_sql_failure_in_any_phase_names_the_file(tmp_path, kind, files, kwargs):
     with pytest.raises(LayerBuildError, match=r"demo/.*broken\.sql"):
         runner.run(cfg)
     assert not cfg.report_path.exists()
+
+
+# --- review 2026-11-07 round 2, G1: export file name and clean start -------------------------
+
+@pytest.mark.parametrize("target", ["", ".", "..", "sub/x.csv", "a b.csv"])
+def test_export_file_must_be_a_bare_file_name(tmp_path, target):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", target)])
+    with pytest.raises(ManifestError, match="export"):
+        runner.run(cfg)
+    assert not (tmp_path / "build/demo").is_file()
+
+
+def test_manifest_export_error_is_raised_at_parse_time(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "")])
+    with pytest.raises(ManifestError, match="export"):
+        runner.discover_products(cfg)
+
+
+def test_a_file_in_place_of_the_product_build_folder_is_replaced(tmp_path):
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "x.csv")])
+    (tmp_path / "build").mkdir()
+    (tmp_path / "build/demo").write_text("not a folder")
+    runner.run(cfg)
+    assert (tmp_path / "build/demo/x.csv").is_file()
+    runner.run(cfg)  # and the next run works too
+    assert (tmp_path / "build/demo/x.csv").is_file()
+
+
+def test_a_symlink_in_place_of_the_product_build_folder_is_not_followed(tmp_path):
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "x.csv")])
+    outside = tmp_path / "elsewhere"
+    outside.mkdir()
+    (outside / "old.csv").write_text("keep")
+    (tmp_path / "build").mkdir()
+    (tmp_path / "build/demo").symlink_to(outside, target_is_directory=True)
+    runner.run(cfg)
+    assert not (tmp_path / "build/demo").is_symlink()
+    assert (tmp_path / "build/demo/x.csv").is_file()
+    assert (outside / "old.csv").read_text() == "keep"   # the target of the link is left alone
+    assert not (outside / "x.csv").exists()

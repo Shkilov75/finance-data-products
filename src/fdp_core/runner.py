@@ -14,6 +14,7 @@ from fdp_core.gates import FAIL, GateResult, run_sql_gate
 from fdp_core.report import write_csv
 
 NAME_PATTERN = re.compile(r"[a-z0-9_]+")
+EXPORT_FILE_PATTERN = re.compile(r"[A-Za-z0-9_.-]+")
 STATUSES = ("active", "reserved")
 
 
@@ -53,11 +54,25 @@ def _parse_manifest(manifest: Path) -> Product:
         for key in ("query", "file"):
             if key not in export:
                 raise ManifestError(f"{manifest}: export without {key!r}")
+        name = export["file"]
+        if (not isinstance(name, str) or not EXPORT_FILE_PATTERN.fullmatch(name)
+                or name in (".", "..")):
+            raise ManifestError(
+                f"{manifest}: export file {name!r} must be a plain file name "
+                f"(letters, digits, _ . -), written into build/{product.name}")
     return product
 
 
 def discover_products(cfg: Config) -> list[Product]:
     return [_parse_manifest(m) for m in sorted(cfg.products_dir.glob("*/product.toml"))]
+
+
+def _remove(path: Path) -> None:
+    """Remove a file, a symlink (never followed) or a folder; a real failure is not hidden."""
+    if path.is_symlink() or path.is_file():
+        path.unlink()
+    elif path.is_dir():
+        shutil.rmtree(path)
 
 
 def _clear_earlier_run(cfg: Config) -> None:
@@ -67,7 +82,7 @@ def _clear_earlier_run(cfg: Config) -> None:
     if cfg.products_dir.is_dir():
         for folder in cfg.products_dir.iterdir():
             if folder.is_dir():
-                shutil.rmtree(cfg.product_build_dir(folder.name), ignore_errors=True)
+                _remove(cfg.product_build_dir(folder.name))
 
 
 def build_layers(cfg: Config, products: list[Product] | None = None) -> duckdb.DuckDBPyConnection:
@@ -77,7 +92,7 @@ def build_layers(cfg: Config, products: list[Product] | None = None) -> duckdb.D
     cfg.report_path.unlink(missing_ok=True)
     for product in products or []:
         if product.status == "active":
-            shutil.rmtree(cfg.product_build_dir(product.name), ignore_errors=True)
+            _remove(cfg.product_build_dir(product.name))
     con = duckdb.connect(str(cfg.db_path))
     for layer in LAYERS:
         con.execute(f"CREATE SCHEMA {layer}")
@@ -112,9 +127,10 @@ def _in_file(product: Product, rel: str):
 
 
 def _export_target(cfg: Config, product: Product, export: dict) -> Path:
+    build = (cfg.root / "build").resolve()
     folder = cfg.product_build_dir(product.name).resolve()
     target = (folder / export["file"]).resolve()
-    if not target.is_relative_to(folder):
+    if folder.parent != build or target.parent != folder:
         raise ManifestError(
             f"{product.path / 'product.toml'}: export file {export['file']!r} "
             f"must stay inside build/{product.name}")

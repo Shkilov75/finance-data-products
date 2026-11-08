@@ -28,7 +28,7 @@
 | T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T19 | Review F6: STRING instead of bare VARCHAR in neutral SQL | domain | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T20 | Review F7: remove unused down scripts and 'Staged DDL' headers from products/ | docs | maksym.shkilov@gmail.com | S | T19 | done | COMMIT |
-| T21 | Review G1: export file must be a non-empty bare name; clean start removes a file or symlink in place of build/<product> | app | maksym.shkilov@gmail.com | S | T20 | todo | — |
+| T21 | Review G1: export file must be a non-empty bare name; clean start removes a file or symlink in place of build/<product> | app | maksym.shkilov@gmail.com | S | T20 | done | COMMIT |
 | T22 | Review G6: clean start leaves build folders of reserved products alone | app | maksym.shkilov@gmail.com | S | T21 | todo | — |
 | T23 | Review G7: manifest errors name the file; list types validated; SQL paths confined to the product folder | app | maksym.shkilov@gmail.com | S | T22 | todo | — |
 | T24 | Review G3: blank translation target counts as untranslated | domain | maksym.shkilov@gmail.com | S | T20 | todo | — |
