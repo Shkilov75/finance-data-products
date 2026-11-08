@@ -50,7 +50,7 @@ Environment: none. Working directory: any inside the repository (root is found f
 
 ### 3.1 Phases (order is part of the contract)
 
-1. Start clean, then rebuild. Delete `build/fdp.duckdb`, `build/report.json` and the folder `build/<product>/` of every active product (repo ADR-0003 for the database file); other files in `build/` are not touched. Then create `build/fdp.duckdb` with the empty layers `raw`, `staging`, `mart`.
+1. Start clean, then rebuild. Delete `build/fdp.duckdb`, `build/report.json` and the folder `build/<product>/` of every product under `products/` except one whose readable manifest says `reserved` (repo ADR-0003 for the database file; a product whose manifest cannot be read is cleaned too, and a file or symlink in place of the folder is removed, never followed); the build folder of a reserved product and other files in `build/` are not touched. Then create `build/fdp.duckdb` with the empty layers `raw`, `staging`, `mart`.
 2. For each active product: execute the engine files (`adapters/duckdb/`, `{engine}` in manifest paths is replaced by the engine name, default `duckdb`), then the neutral `sql` files. A failing file → exit 3.
 3. Run the product's `invariants` in the order of the manifest list (zero-row convention). The first invariant that returns rows stops the run with exit 2; the invariants after it are not executed.
 4. Run the product's `gates` (zero-row convention). A failed gate does not stop the run.
@@ -127,6 +127,8 @@ reserved: functional_model
 | 2, ambiguous mapping | `invariant violation: unambiguous mapping` | source system and local account (AC-11), whether the group accounts differ or repeat |
 | 3 | `error: <message>` | file and cause, e.g. `unified_gl/sql/staging/04_create_staging_ledger_entry.sql: ...` |
 
+An empty source system, local account, document, line or description in an offender line is printed as `?`, never left blank.
+
 Example (exit 2, placeholder values):
 
 ```
@@ -144,12 +146,12 @@ After exit 2 or exit 3 no report file exists: neither `build/report.json` nor `b
 | Entry lost or amount differs between raw and aligned | 1 | AC-08 | 2, 6 |
 | Unreadable entry (date, amount, both/neither side filled, zero, too many decimals) | 1 (shows as a missing entry) | AC-09 | 5, 6 |
 | Local account without a mapping row | 1 (mapping gate) | AC-10 | 2, 5 |
-| Description without translation | 0 (entry stays; one record in the exceptions report) | AC-02 | 4, 5 |
+| Description without translation: no translation row, no exact whole-text match, or a row whose translation is empty or only spaces | 0 (entry stays; one record in the exceptions report) | AC-02 | 4, 5 |
 | Same source system, document and line twice in one export (checked on raw records) | 2 | AC-06 | 1, 7 |
 | Same original description twice in the translation list | 2 | AC-02, AC-06 | 1 |
 | Same `entry_id` twice | 2 | AC-06 | 1, 7 |
 | Same local account twice in the mapping (same or different group account) | 2 | AC-11 | 1 |
-| Layer SQL file fails, manifest key missing or malformed (the message names `product.toml`), a path that leaves the product folder, an export `file` that is not a plain file name | 3 | SAD §8, AC-12 | 1 |
+| Layer SQL file fails, manifest key missing, unknown or malformed, file not UTF-8 (the message names `product.toml`), a path that leaves the product folder (checked again with the real engine name, so a symlinked engine folder cannot lead out), an export `file` that is not a plain file name or is listed twice | 3 | SAD §8, AC-12 | 1 |
 
 ### 3.6 Idempotency
 
@@ -191,7 +193,7 @@ Only the generator writes the input files; a product run opens them read-only (A
 | `summary` | path | one query printed as the summary table |
 | `exports` | list of `{query, file}` | each query written by the core as CSV into `build/<product>/`; `file` is a plain file name (letters, digits, `_`, `.`, `-`), never a path |
 
-Every path in `sql`, `invariants`, `gates`, `summary` and `exports[].query` stays inside the product's own folder (products never share SQL); `sql`, `gates` and `invariants` are lists of strings. A violation is a manifest error: exit 3, the message names the `product.toml`. The clean start (§3.1 phase 1) removes `build/<product>/` of every product except one whose manifest says `reserved`; a file or symlink in its place is removed, never followed.
+Every path in `sql`, `invariants`, `gates`, `summary` and `exports[].query` stays inside the product's own folder (products never share SQL); `sql`, `gates` and `invariants` are lists of strings. A violation is a manifest error: exit 3, the message names the `product.toml`. The clean start (§3.1 phase 1) removes `build/<product>/` of every product except one whose manifest says `reserved`; a file or symlink in its place is removed, never followed. A key that is not listed in the table (for example a misspelled `invariant`), in the product or in an `exports` table, is a manifest error, so a phase can never be switched off silently; every `exports[].file` is unique within a product. The manifest is read as UTF-8. Summary and export queries all run first and the CSV files are written only after every one of them succeeded, so exit 3 leaves no export of this run.
 
 ## 7. Data contract — the aligned entry set
 

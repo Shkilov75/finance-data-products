@@ -44,6 +44,6 @@
 | T34 | Review H5: path confinement checks the path that is read when {engine} is used | app | maksym.shkilov@gmail.com | S | T33 | done | COMMIT |
 | T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | done | COMMIT |
 | T36 | Review H1: close the surviving test mutants of the F1-F3/G2 fixes | tests | maksym.shkilov@gmail.com | S | T35 | done | COMMIT |
-| T37 | Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code | docs | maksym.shkilov@gmail.com | S | T36 | todo | SELECT |
+| T37 | Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code | docs | maksym.shkilov@gmail.com | S | T36 | done | COMMIT |
 
 **Total:** 13 tasks, ~10.5 person-days.

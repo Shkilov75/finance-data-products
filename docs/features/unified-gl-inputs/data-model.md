@@ -145,7 +145,7 @@ File: `products/unified_gl/data/description_translation_synthetic.csv`.
 **Aggregate root:** root.
 **Access patterns:** lookup by `(source_system, original_description)` → alignment join and the exceptions report.
 **Constraints:** `(source_system, original_description)` unique by construction of the generator (a duplicate would multiply entries; the invariant «unambiguous translation» stops the run first and names the repeated description, so it is never reported as a repeated entry id).
-**Design note:** ERP B is already in English, so the generator writes identity rows (`original = common`) for its descriptions. This keeps the neutral SQL uniform: one left join for both systems, and «no translation row» always means «exceptions report», without a per-system language rule.
+**Design note:** ERP B is already in English, so the generator writes identity rows (`original = common`) for its descriptions. This keeps the neutral SQL uniform: one left join for both systems, and «no translation» (no row, or a row whose translation is empty or only spaces) always means «exceptions report», without a per-system language rule.
 
 ### `raw.exchange_rate`
 
@@ -159,7 +159,7 @@ File: `products/unified_gl/data/rates_synthetic.csv` (name fixed by AC-05 after 
 
 **Aggregate root:** root.
 **Access patterns:** none in this step.
-**Constraints:** none; completeness of rates (exactly one rate per currency and day) is checked by the generator's input checks (SAD Flow 3), not by the product run.
+**Constraints:** none; completeness of rates (exactly one rate per currency and day) is checked by the test suite (cli.md §5, SAD Flow 3), not by the generator and not by the product run.
 
 ### `staging.ledger_entry` (aligned entry set)
 
@@ -176,7 +176,7 @@ Created in neutral SQL (`products/unified_gl/sql/staging/`), one row per accepte
 | `transaction_currency` | STRING | NOT NULL | EUR, GBP or USD in the data; the run summary lists the currencies found here (AC-14) |
 | `local_account` | STRING | NOT NULL | account in the source's own chart |
 | `group_account` | STRING | NULL allowed | NULL = no mapping row; the mapping gate fails on it (AC-10) |
-| `description` | STRING | NOT NULL | common language; the original text when no translation exists (AC-02) |
+| `description` | STRING | NOT NULL | common language; the original text when no translation exists, including a translation row whose text is empty or only spaces (AC-02) |
 | `original_description` | STRING | NOT NULL | the source's text; needed by the exceptions report, which cannot tell «untranslated» from «translated» using `description` alone |
 
 **Aggregate root:** root (no children).

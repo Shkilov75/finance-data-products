@@ -56,7 +56,7 @@ command line client: `duckdb build/fdp.duckdb "SELECT * FROM staging.ledger_entr
 | `transaction_currency` | STRING | Currency of the document (EUR, GBP or USD in the data); the run summary lists exactly the currencies found here | no |
 | `local_account` | STRING | Account in the source's own chart of accounts | no |
 | `group_account` | STRING | Account of the common chart that the local account maps to | yes: empty means no mapping row, and the mapping gate fails |
-| `description` | STRING | Description in English; the original text when the translation list has no exact match | no |
+| `description` | STRING | Description in English; the original text when the translation list has no exact match or its translation is empty or only spaces | no |
 | `original_description` | STRING | Description exactly as the source wrote it (needed by the exceptions report) | no |
 
 ### Trace an entry back to its raw record
@@ -72,7 +72,7 @@ Raw data is kept as it arrived. Find the record by `source_system`, `source_docu
 |---|---|---|
 | Invariant check (`invariants/`) | Stops the run when a key is broken: a document and line repeated in one export, an ambiguous account mapping, an ambiguous translation row (the same original description twice), or a repeated `entry_id`. They run in that order, so a repeated mapping or translation row is reported as itself and not as a repeated `entry_id`. Names the source system, document and line (or local account, or description) | Error, exit code 2 |
 | Gate (`gates/`) | `01_completeness.sql` compares the raw side with the aligned entries (counts and debit and credit totals per source system and currency, and every single entry); `02_mapping.sql` lists entries without a group account | A failed gate is a result: the run goes on and ends with exit code 1 |
-| Exceptions report | One record per aligned entry whose description has no translation (exact whole-text match), kept with its original text | `build/unified_gl/exceptions_report.csv`, always written, header only when empty |
+| Exceptions report | One record per aligned entry whose description has no translation (exact whole-text match; an empty or space-only translation counts as none), kept with its original text | `build/unified_gl/exceptions_report.csv`, always written, header only when empty |
 
 Every check is one SQL file; zero returned rows means the check passes.
 
