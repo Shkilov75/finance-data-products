@@ -35,7 +35,7 @@
 | T25 | Review G4: completeness gate prints an unreadable line as written | domain | maksym.shkilov@gmail.com | S | T24 | done | COMMIT |
 | T26 | Review G5: invariant messages survive an empty key | domain | maksym.shkilov@gmail.com | S | T25 | done | COMMIT |
 | T27 | Review G9: invariant file numbers follow the execution order | domain | maksym.shkilov@gmail.com | S | T26 | done | COMMIT |
-| T28 | Review G2: ERP B and credit-side test coverage for the F1-F3 fixes | tests | maksym.shkilov@gmail.com | M | T27, T23 | todo | — |
+| T28 | Review G2: ERP B and credit-side test coverage for the F1-F3 fixes | tests | maksym.shkilov@gmail.com | M | T27, T23 | done | COMMIT |
 | T29 | Review G8: update README, cli.md, data-model.md and sad.md for the fourth invariant and STRING | docs | maksym.shkilov@gmail.com | S | T28 | todo | — |
 
 **Total:** 13 tasks, ~10.5 person-days.

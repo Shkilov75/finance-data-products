@@ -127,6 +127,8 @@ def test_exact_text_is_translated(con):
     ("BA-1", "1", "06.01.2026", "4710", "-10,00", "", "EUR"),   # negative
     ("BA-1", "1", "06.01.2026", "4710", "0,00", "", "EUR"),     # zero
     ("BA-1", "1", "06.01.2026", "4710", "10,005", "", "EUR"),   # 3 decimals
+    ("BA-1", "1", "06.01.2026", "4710", "10,00", "", ""),       # empty currency (AC-09)
+    ("BA-1", "1", "06.01.2026", "", "10,00", "", "EUR"),        # empty account
 ])
 def test_unreadable_entry_is_absent(con, a_values):
     con.execute("DELETE FROM raw.erp_a_export")
@@ -214,3 +216,19 @@ def test_blank_translation_target_keeps_the_original_description_and_is_reported
     assert entry[10] == "Miete Bürogebäude"
     listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
     assert [r[3] for r in listed] == ["Miete Bürogebäude"]
+
+
+@pytest.mark.parametrize("memo", ["Rent ", " Rent", "RENT"])
+def test_erp_b_translation_needs_exact_whole_text_too(con, memo):
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("DELETE FROM raw.erp_b_export")
+    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1','01/06/2026','USD',"
+                "[{'line_no':'1','account':'4710','amount':'10.00','memo':?}])", [memo])
+    con.execute("DELETE FROM raw.description_translation WHERE source_system = 'ERP_B'")
+    con.execute("INSERT INTO raw.description_translation VALUES ('ERP_B','Rent','Rent')")
+    build(con)
+    entry = rows(con)[0]
+    assert entry[1] == "ERP_B"
+    assert (entry[9], entry[10]) == (memo, memo)    # not translated, kept as the source wrote it
+    listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
+    assert [r[3] for r in listed] == [memo]

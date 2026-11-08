@@ -31,11 +31,12 @@ def a_row(con, *, doc="BA-1", line="1", date="06.01.2026", account="4710", debit
     return con.execute("SELECT count(*), max(signed_amount) FROM raw.control_erp_a").fetchone()
 
 
-def b_row(con, *, date="01/06/2026", amount="10.00", account="4710", currency="USD"):
+def b_row(con, *, doc="B1", line="1", date="01/06/2026", amount="10.00", account="4710",
+          currency="USD"):
     con.execute("DELETE FROM raw.erp_b_export")
-    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1',?,?,"
-                "[{'line_no':'1','account':?,'amount':?,'memo':'Rent'}])",
-                [date, currency, account, amount])
+    con.execute("INSERT INTO raw.erp_b_export VALUES (?,?,?,"
+                "[{'line_no':?,'account':?,'amount':?,'memo':'Rent'}])",
+                [doc, date, currency, line, account, amount])
     return con.execute("SELECT count(*), max(signed_amount) FROM raw.control_erp_b").fetchone()
 
 
@@ -98,6 +99,22 @@ def test_erp_b_format_the_typed_view_rejects_is_unreadable_here_too(con, kwargs)
     assert b_row(con, **kwargs) == (1, None)
 
 
+@pytest.mark.parametrize("credit", ["12.5", "1.23,45", "1e3", "+5,00", "10,005", "-5,00"])
+def test_erp_a_credit_side_is_read_as_strictly_as_the_debit_side(con, credit):
+    assert a_row(con, debit="", credit=credit) == (1, None)
+
+
+@pytest.mark.parametrize("view, row, bad_date", [
+    ("typed_erp_a", a_row, "6.1.2026"),
+    ("typed_erp_a", a_row, "06.01.26"),
+    ("typed_erp_b", b_row, "1/6/2026"),
+    ("typed_erp_b", b_row, "01/06/26"),
+])
+def test_typed_views_read_a_date_only_in_the_strict_source_format(con, view, row, bad_date):
+    row(con, date=bad_date)
+    assert con.execute(f"SELECT entry_date FROM raw.{view}").fetchone() == (None,)
+
+
 def test_erp_b_fractional_line_is_unreadable(con):
     b_row(con)
     con.execute("DELETE FROM raw.erp_b_export")
@@ -120,6 +137,9 @@ def test_erp_a_fractional_line_is_unreadable_in_the_typed_view(con):
     {"amount": "abc"},
     {"account": ""},
     {"currency": ""},
+    {"doc": ""},                                   # empty document (review G2)
+    {"doc": "   "},
+    {"line": "x"},
 ])
 def test_erp_b_unreadable_rule_keeps_row_with_null_amount(con, kwargs):
     assert b_row(con, **kwargs) == (1, None)

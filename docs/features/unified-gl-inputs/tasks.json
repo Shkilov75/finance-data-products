@@ -574,7 +574,7 @@
         "tests/unit/test_reports_sql.py",
         "tests/unit/test_gates.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T29",

@@ -38,6 +38,19 @@ def add_rows(cfg, *rows):
         fh.write("".join(row + "\n" for row in rows))
 
 
+def add_b_documents(cfg, *documents):
+    import json
+    path = cfg.root / "products/unified_gl/data/erp_b_export_synthetic.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data.extend(documents)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def b_doc(doc_id="B9", line_no="1", currency="USD", amount="5.00"):
+    return {"doc_id": doc_id, "posting_date": "01/06/2026", "currency": currency,
+            "lines": [{"line_no": line_no, "account": "4710", "amount": amount, "memo": "x"}]}
+
+
 @pytest.mark.parametrize("row, missing", [
     ("BA-9;1.5;06.01.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line 1.5: missing in aligned entries"),
     (";01;06.01.2026;4660;5,00;;EUR;x", "ERP_A ? line 1: missing in aligned entries"),
@@ -77,3 +90,38 @@ def test_duplicate_with_empty_document_stops_the_run_and_names_the_offender(cfg)
     with pytest.raises(InvariantViolation) as exc:
         runner.run(cfg)
     assert any("ERP_A ? line 1 appears 2 times" in str(r) for r in exc.value.rows)
+
+
+# --- review round 2, G2: ERP B and currency through the real load path -----------------------
+
+def test_erp_b_empty_document_is_not_in_the_raw_totals_and_is_named(cfg):
+    add_b_documents(cfg, b_doc(doc_id="", amount="5.00"))
+    messages = [r[0] for r in runner.run(cfg).gates[0].violations]
+    assert "ERP_B ? line 1: missing in aligned entries" in messages
+    assert not any("total: raw" in m for m in messages)
+    assert all(m for m in messages)
+
+
+def test_erp_b_duplicate_with_unreadable_line_stops_the_run(cfg):
+    add_b_documents(cfg, b_doc(line_no="x"), b_doc(line_no="x"))
+    with pytest.raises(InvariantViolation) as exc:
+        runner.run(cfg)
+    assert exc.value.label == "unique document and line"
+    assert any("ERP_B B9 line x appears 2 times" in str(r) for r in exc.value.rows)
+
+
+def test_erp_b_duplicate_with_empty_document_stops_the_run(cfg):
+    add_b_documents(cfg, b_doc(doc_id=""), b_doc(doc_id=""))
+    with pytest.raises(InvariantViolation) as exc:
+        runner.run(cfg)
+    assert any("ERP_B ? line 1 appears 2 times" in str(r) for r in exc.value.rows)
+
+
+def test_empty_currency_is_a_gate_finding_with_a_readable_message_not_an_engine_error(cfg):
+    add_rows(cfg, "BA-9;1;06.01.2026;4660;5,00;;;x")
+    result = runner.run(cfg).gates[0]
+    messages = [r[0] for r in result.violations]
+    assert result.status == FAIL
+    assert "ERP_A UNKNOWN entries: raw 1, aligned 0" in messages
+    assert "ERP_A BA-9 line 1: missing in aligned entries" in messages
+    assert all(m for m in messages)
