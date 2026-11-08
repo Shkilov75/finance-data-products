@@ -282,6 +282,151 @@
       ],
       "file": "docs/features/unified-gl-inputs/tasks/e2e-tests.md",
       "status": "done"
+    },
+    {
+      "id": "T14",
+      "title": "Review F1: strict raw readability (line digits only, empty document, unreadable-line duplicates, independent format checks in control views)",
+      "layer": "domain",
+      "deps": [
+        "T13"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-06",
+        "AC-08",
+        "AC-09"
+      ],
+      "dod": "Fractional line, empty document, unreadable-line duplicate and lenient control-view formats are caught; tests go through the CSV load path.",
+      "files_hint": [
+        "products/unified_gl/adapters/duckdb/02_create_typed_views.sql",
+        "products/unified_gl/adapters/duckdb/03_create_control_views.sql",
+        "products/unified_gl/invariants/01_unique_document_and_line.sql",
+        "products/unified_gl/gates/01_completeness.sql",
+        "tests/unit/test_control_views.py",
+        "tests/unit/test_gates.py",
+        "tests/unit/test_invariants.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T15",
+      "title": "Review F2: translate on exact untrimmed text, keep original_description as written",
+      "layer": "domain",
+      "deps": [
+        "T14"
+      ],
+      "acs": [
+        "AC-02"
+      ],
+      "dod": "A description with leading/trailing spaces is not translated, is listed in the exceptions report and stays as written.",
+      "files_hint": [
+        "products/unified_gl/adapters/duckdb/02_create_typed_views.sql",
+        "tests/unit/test_ledger_entry.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T16",
+      "title": "Review F3: empty translation target counts as untranslated; invariant for a repeated translation row",
+      "layer": "domain",
+      "deps": [
+        "T15"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-06"
+      ],
+      "dod": "Empty target is listed in the exceptions report; a repeated translation row stops the run with its own message.",
+      "files_hint": [
+        "products/unified_gl/reports/exceptions_report.sql",
+        "products/unified_gl/invariants/04_unambiguous_translation.sql",
+        "products/unified_gl/product.toml",
+        "tests/unit/test_reports_sql.py",
+        "tests/unit/test_invariants.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T17",
+      "title": "Review F4: runner contract \u2014 stale files after exit 3, unknown status, file-named errors, manifest path validation",
+      "layer": "app",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-12",
+        "AC-13"
+      ],
+      "dod": "Exit 3 leaves no report files from earlier runs; unknown status, bad name/export path and failing SQL give exit 3 naming the file.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "src/fdp_core/errors.py",
+        "tests/unit/test_runner_phases.py",
+        "tests/unit/test_report_cli.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T18",
+      "title": "Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests",
+      "layer": "tests",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-11"
+      ],
+      "dod": "Equal-attribute pair keeps distinct ids; the real product.toml stops the run on a repeated mapping/document; weak assertions are tightened.",
+      "files_hint": [
+        "products/unified_gl/data/generate.py",
+        "tests/unit/test_ledger_entry.py",
+        "tests/unit/test_invariants.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T19",
+      "title": "Review F6: STRING instead of bare VARCHAR in neutral SQL",
+      "layer": "domain",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "No bare VARCHAR in neutral SQL; data-model.md corrected; a test forbids it.",
+      "files_hint": [
+        "products/unified_gl/sql/staging/04_create_staging_ledger_entry.sql",
+        "products/unified_gl/gates/01_completeness.sql",
+        "products/unified_gl/gates/02_mapping.sql",
+        "products/unified_gl/invariants/01_unique_document_and_line.sql",
+        "products/unified_gl/invariants/03_unique_entry_id.sql",
+        "docs/features/unified-gl-inputs/data-model.md",
+        "tests/unit/test_gates.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T20",
+      "title": "Review F7: remove unused down scripts and 'Staged DDL' headers from products/",
+      "layer": "docs",
+      "deps": [
+        "T19"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "No *.down.sql under products/; tests use the staged up files or are adjusted.",
+      "files_hint": [
+        "products/unified_gl/adapters/duckdb",
+        "products/unified_gl/sql/staging",
+        "tests/unit/test_adapter_duckdb.py",
+        "tests/unit/test_control_views.py",
+        "tests/unit/test_ledger_entry.py"
+      ],
+      "status": "todo"
     }
   ]
 }
