@@ -19,6 +19,7 @@ sql = [
 invariants = [
   "invariants/01_unique_document_and_line.sql",
   "invariants/02_unambiguous_mapping.sql",
+  "invariants/04_unambiguous_translation.sql",
   "invariants/03_unique_entry_id.sql",
 ]
 gates = []
@@ -144,3 +145,13 @@ def test_invariants_are_neutral_sql_without_engine_constructs():
     for path in (REPO / "products/unified_gl/invariants").glob("*.sql"):
         code = "\n".join(line.split("--", 1)[0] for line in path.read_text().splitlines()).lower()
         assert "read_" not in code and "strptime" not in code, path.name
+
+
+@pytest.mark.parametrize("second", ["Office building rent", "Rent of the office building"])
+def test_repeated_translation_row_is_reported_as_such_not_as_an_entry_id_collision(cfg, second):
+    append(data(cfg, "description_translation_synthetic.csv"),
+           f"ERP_A,Miete Bürogebäude,{second}\n")
+    err = expect_violation(cfg)
+    assert err.label == "unambiguous translation"
+    assert any("ERP_A" in str(r) and "Miete Bürogebäude" in str(r) and "2 times" in str(r)
+               for r in err.rows)

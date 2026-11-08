@@ -48,7 +48,7 @@ SELECT
     r.currency,
     r.local_account,
     m.group_account,
-    coalesce(t.common_description, r.description),
+    coalesce(nullif(t.common_description, ''), r.description),
     r.description
 FROM readable AS r
 LEFT JOIN raw.account_mapping AS m

@@ -148,3 +148,12 @@ def test_report_queries_are_neutral_sql():
             if path.name == "exceptions_report.sql" and forbidden == "raw.description":
                 continue
             assert forbidden not in code, (path.name, forbidden)
+
+
+def test_empty_translation_target_stays_untranslated_and_in_the_report(cfg):
+    path = cfg.root / "products/unified_gl/data/description_translation_synthetic.csv"
+    with path.open("a", encoding="utf-8", newline="") as fh:
+        fh.write("ERP_A,Bewirtung Kundentermin,\n")
+    _, rows, _ = query(cfg, "exceptions_report.sql")
+    assert "Bewirtung Kundentermin" in {r[3] for r in rows}
+    assert len(rows) == 9  # same as without the empty row: nothing disappears from the report
