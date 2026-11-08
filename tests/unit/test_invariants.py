@@ -196,3 +196,20 @@ def test_real_manifest_stops_on_a_repeated_document_and_line(real_cfg):
 def test_real_manifest_stops_on_a_repeated_translation_row(real_cfg):
     append(data(real_cfg, "description_translation_synthetic.csv"), "ERP_A,Miete Bürogebäude,Rent\n")
     assert expect_violation(real_cfg).label == "unambiguous translation"
+
+
+# --- review 2026-11-07 round 2, G5: an empty key must not blank the offender message ---------
+
+def test_mapping_rows_with_an_empty_account_name_the_source_system(cfg):
+    append(data(cfg, "account_mapping_synthetic.csv"), "ERP_A,,9999\nERP_A,,9998\n")
+    err = expect_violation(cfg)
+    assert err.label == "unambiguous mapping"
+    assert [r[0] for r in err.rows] == ["ERP_A ? appears 2 times in account_mapping_synthetic.csv"]
+
+
+def test_translation_rows_with_an_empty_description_name_the_source_system(cfg):
+    append(data(cfg, "description_translation_synthetic.csv"), "ERP_A,,One\nERP_A,,Two\n")
+    err = expect_violation(cfg)
+    assert err.label == "unambiguous translation"
+    assert [r[0] for r in err.rows] == [
+        "ERP_A ? appears 2 times in description_translation_synthetic.csv"]

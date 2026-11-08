@@ -33,7 +33,7 @@
 | T23 | Review G7: manifest errors name the file; list types validated; SQL paths confined to the product folder | app | maksym.shkilov@gmail.com | S | T22 | done | COMMIT |
 | T24 | Review G3: blank translation target counts as untranslated | domain | maksym.shkilov@gmail.com | S | T20 | done | COMMIT |
 | T25 | Review G4: completeness gate prints an unreadable line as written | domain | maksym.shkilov@gmail.com | S | T24 | done | COMMIT |
-| T26 | Review G5: invariant messages survive an empty key | domain | maksym.shkilov@gmail.com | S | T25 | todo | — |
+| T26 | Review G5: invariant messages survive an empty key | domain | maksym.shkilov@gmail.com | S | T25 | done | COMMIT |
 | T27 | Review G9: invariant file numbers follow the execution order | domain | maksym.shkilov@gmail.com | S | T26 | todo | — |
 | T28 | Review G2: ERP B and credit-side test coverage for the F1-F3 fixes | tests | maksym.shkilov@gmail.com | M | T27, T23 | todo | — |
 | T29 | Review G8: update README, cli.md, data-model.md and sad.md for the fourth invariant and STRING | docs | maksym.shkilov@gmail.com | S | T28 | todo | — |

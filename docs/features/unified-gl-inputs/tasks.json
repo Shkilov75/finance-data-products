@@ -531,7 +531,7 @@
         "products/unified_gl/invariants/04_unambiguous_translation.sql",
         "tests/unit/test_invariants.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T27",
