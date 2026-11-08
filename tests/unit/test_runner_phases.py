@@ -411,3 +411,14 @@ def test_report_json_counts_the_violating_rows_of_a_failed_gate(tmp_path):
     runner.run(cfg)
     assert json.loads(cfg.report_path.read_text()) == [
         {"gate": "01_g", "status": "FAIL", "violations": 2}]
+
+
+# --- review 2026-11-07 round 4, I2: file names are unique ignoring case ----------------------
+
+def test_export_files_that_differ_only_in_case_are_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "x.csv"),
+                                          ("reports/summary.sql", "X.csv")])
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*X\.csv.*twice"):
+        runner.run(cfg)
+    assert not cfg.db_path.exists()

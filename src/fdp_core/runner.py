@@ -92,9 +92,9 @@ def _parse_manifest(manifest: Path) -> Product:
             raise ManifestError(
                 f"{manifest}: export file {name!r} must be a plain file name "
                 f"(letters, digits, _ . -), written into build/{product.name}")
-        if name in files_seen:
+        if name.casefold() in files_seen:  # two names of one file on a case-insensitive file system
             raise ManifestError(f"{manifest}: export file {name!r} is listed twice")
-        files_seen.add(name)
+        files_seen.add(name.casefold())
     return product
 
 
