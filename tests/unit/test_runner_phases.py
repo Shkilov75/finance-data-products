@@ -472,3 +472,25 @@ def test_a_misnamed_active_product_cannot_leave_its_exports_behind(tmp_path):
         runner.run(cfg)
     assert not (tmp_path / "build/folder_x").exists()
     assert not (tmp_path / "build/prod_y").exists()
+
+
+# --- review 2026-11-07 round 4, I6: a failing write leaves none of this run's exports ----------
+
+def test_a_failing_second_write_removes_the_file_already_written(tmp_path, monkeypatch):
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "first.csv"),
+                                          ("reports/summary.sql", "second.csv")])
+    real, calls = runner.write_csv, []
+
+    def flaky(target, columns, rows):
+        calls.append(target.name)
+        if len(calls) == 2:
+            raise OSError("disk full")
+        real(target, columns, rows)
+
+    monkeypatch.setattr(runner, "write_csv", flaky)
+    with pytest.raises(OSError, match="disk full"):
+        runner.run(cfg)
+    assert calls == ["first.csv", "second.csv"]
+    assert not (tmp_path / "build/demo/first.csv").exists()
+    assert not (tmp_path / "build/demo/second.csv").exists()
+    assert not cfg.report_path.exists()

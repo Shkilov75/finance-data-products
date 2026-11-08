@@ -237,9 +237,16 @@ def _run(cfg: Config) -> RunResult:
                 with _in_file(product, export["query"]):
                     columns, rows = _query(con, _read(cfg, product, export["query"]))
                 pending.append((target, columns, rows, export["file"]))
-        for target, columns, rows, file in pending:
-            write_csv(target, columns, rows)
-            result.exports.append((file, len(rows)))
+        written: list[Path] = []
+        try:
+            for target, columns, rows, file in pending:
+                written.append(target)
+                write_csv(target, columns, rows)
+                result.exports.append((file, len(rows)))
+        except BaseException:  # all or nothing: a failed write leaves no export of this run
+            for target in written:
+                target.unlink(missing_ok=True)
+            raise
     finally:
         con.close()
     cfg.report_path.write_text(json.dumps(
