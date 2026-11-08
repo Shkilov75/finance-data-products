@@ -705,7 +705,7 @@
         "src/fdp_core/runner.py",
         "tests/unit/test_runner_phases.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T36",

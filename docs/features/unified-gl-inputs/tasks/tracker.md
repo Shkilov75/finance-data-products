@@ -42,7 +42,7 @@
 | T32 | Review H6: non-UTF-8 manifest is a named ManifestError and cannot leave stale outputs | app | maksym.shkilov@gmail.com | S | T31 | done | COMMIT |
 | T33 | Review H7: reject unknown manifest keys and repeated export file names | app | maksym.shkilov@gmail.com | S | T32 | done | COMMIT |
 | T34 | Review H5: path confinement checks the path that is read when {engine} is used | app | maksym.shkilov@gmail.com | S | T33 | done | COMMIT |
-| T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | todo | SELECT |
+| T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | done | COMMIT |
 | T36 | Review H1: close the surviving test mutants of the F1-F3/G2 fixes | tests | maksym.shkilov@gmail.com | S | T35 | todo | SELECT |
 | T37 | Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code | docs | maksym.shkilov@gmail.com | S | T36 | todo | SELECT |
 

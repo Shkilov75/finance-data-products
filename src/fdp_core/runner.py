@@ -219,7 +219,8 @@ def _run(cfg: Config) -> RunResult:
                     result.gates.append(run_sql_gate(con, _resolve(cfg, product, rel)))
             if product.gates:
                 result.gated_products.append(product.name)
-        for product in active:  # phase 5: summary and exports
+        pending = []  # phase 5: run every query first, write files only when all succeeded
+        for product in active:
             if product.summary:
                 with _in_file(product, product.summary):
                     result.summaries.append(_query(con, _read(cfg, product, product.summary)))
@@ -227,8 +228,10 @@ def _run(cfg: Config) -> RunResult:
                 target = _export_target(cfg, product, export)
                 with _in_file(product, export["query"]):
                     columns, rows = _query(con, _read(cfg, product, export["query"]))
-                write_csv(target, columns, rows)
-                result.exports.append((export["file"], len(rows)))
+                pending.append((target, columns, rows, export["file"]))
+        for target, columns, rows, file in pending:
+            write_csv(target, columns, rows)
+            result.exports.append((file, len(rows)))
     finally:
         con.close()
     cfg.report_path.write_text(json.dumps(

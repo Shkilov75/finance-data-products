@@ -352,3 +352,36 @@ def test_symlinked_engine_folder_pointing_outside_the_product_is_a_manifest_erro
     tables = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
     con.close()
     assert "leaked" not in tables
+
+
+# --- review 2026-11-07 round 3, H8: after exit 3 no export of this run exists ----------------
+
+BROKEN = {"reports/broken.sql": "SELECT * FROM nope"}
+
+
+def test_a_broken_second_export_leaves_no_file_of_the_first(tmp_path):
+    from fdp_core.errors import LayerBuildError
+    cfg = make_product(tmp_path, files=BROKEN, exports=[("reports/exceptions.sql", "first.csv"),
+                                                          ("reports/broken.sql", "second.csv")])
+    with pytest.raises(LayerBuildError, match=r"broken\.sql"):
+        runner.run(cfg)
+    assert not (tmp_path / "build/demo/first.csv").exists()
+    assert not (tmp_path / "build/demo/second.csv").exists()
+    assert not cfg.report_path.exists()
+
+
+def test_a_failing_summary_of_a_later_product_leaves_no_export_of_an_earlier_one(tmp_path):
+    from fdp_core.errors import LayerBuildError
+    make_product(tmp_path, name="aaa", sql=(), gates=(), exports=[("reports/exceptions.sql", "a.csv")])
+    cfg = make_product(tmp_path, name="zzz", files=BROKEN, summary="reports/broken.sql")
+    with pytest.raises(LayerBuildError, match=r"zzz/reports/broken\.sql"):
+        runner.run(cfg)
+    assert not (tmp_path / "build/aaa/a.csv").exists()
+
+
+def test_exports_are_still_written_when_everything_succeeds(tmp_path):
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", "first.csv"),
+                                          ("reports/summary.sql", "second.csv")])
+    result = runner.run(cfg)
+    assert (tmp_path / "build/demo/first.csv").is_file() and (tmp_path / "build/demo/second.csv").is_file()
+    assert [name for name, _ in result.exports] == ["first.csv", "second.csv"]
