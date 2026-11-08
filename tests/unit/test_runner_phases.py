@@ -227,3 +227,49 @@ def test_a_product_with_an_unreadable_manifest_is_still_cleaned(tmp_path):
     with pytest.raises(ManifestError):
         runner.run(cfg)
     assert not stale.exists()
+
+
+# --- review 2026-11-07 round 2, G7: manifest shape and path confinement ----------------------
+
+def test_malformed_toml_is_a_manifest_error_naming_the_file(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    stale = tmp_path / "build" / "demo"
+    stale.mkdir(parents=True)
+    (stale / "old.csv").write_text("old")
+    (tmp_path / "products/demo/product.toml").write_text('name = "demo"\nstatus = active\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml"):
+        runner.run(cfg)
+    assert not stale.exists()
+
+
+@pytest.mark.parametrize("key", ["sql", "gates", "invariants"])
+@pytest.mark.parametrize("value", ['"x.sql"', "[1]", "7"])
+def test_manifest_lists_must_be_lists_of_strings(tmp_path, key, value):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").write_text(
+        f'name = "demo"\nstatus = "active"\n{key} = {value}\n')
+    with pytest.raises(ManifestError, match=rf"{key}.*list"):
+        runner.discover_products(cfg)
+
+
+@pytest.mark.parametrize("field, line", [
+    ("sql", 'sql = ["../other/sql/x.sql"]'),
+    ("gates", 'gates = ["../other/sql/x.sql"]'),
+    ("invariants", 'invariants = ["../other/sql/x.sql"]'),
+    ("summary", 'summary = "../other/sql/x.sql"'),
+    ("exports", '[[exports]]\nquery = "../other/sql/x.sql"\nfile = "x.csv"'),
+    ("sql", 'sql = ["/etc/hosts"]'),
+])
+def test_sql_path_outside_the_product_folder_is_a_manifest_error(tmp_path, field, line):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    other = tmp_path / "products/other/sql"
+    other.mkdir(parents=True)
+    (other / "x.sql").write_text("CREATE TABLE staging.leaked AS SELECT 1 AS x;")
+    (tmp_path / "products/demo/product.toml").write_text(
+        f'name = "demo"\nstatus = "active"\n{line}\n')
+    with pytest.raises(ManifestError, match="inside the product folder"):
+        runner.run(cfg)
+    assert not cfg.db_path.exists()   # rejected while reading manifests, before any SQL ran

@@ -30,8 +30,20 @@ class Product:
     exports: list[dict] = field(default_factory=list)
 
 
+def _check_inside(manifest: Path, product: Product, rel: object, what: str) -> None:
+    """A manifest path must stay in its own product folder (products never share SQL)."""
+    if not isinstance(rel, str) or not rel:
+        raise ManifestError(f"{manifest}: {what} must be a non-empty path")
+    folder = product.path.resolve()
+    if not (folder / rel.replace("{engine}", "engine")).resolve().is_relative_to(folder):
+        raise ManifestError(f"{manifest}: {what} {rel!r} must stay inside the product folder")
+
+
 def _parse_manifest(manifest: Path) -> Product:
-    data = tomllib.loads(manifest.read_text())
+    try:
+        data = tomllib.loads(manifest.read_text())
+    except tomllib.TOMLDecodeError as exc:
+        raise ManifestError(f"{manifest}: {exc}") from exc
     try:
         product = Product(
             name=data["name"],
@@ -50,10 +62,21 @@ def _parse_manifest(manifest: Path) -> Product:
     if product.status not in STATUSES:
         raise ManifestError(
             f"{manifest}: status {product.status!r} must be one of {', '.join(STATUSES)}")
+    for key in ("sql", "gates", "invariants"):
+        files = getattr(product, key)
+        if not isinstance(files, list) or not all(isinstance(f, str) for f in files):
+            raise ManifestError(f"{manifest}: {key} must be a list of file paths")
+        for rel in files:
+            _check_inside(manifest, product, rel, key)
+    if product.summary is not None:
+        _check_inside(manifest, product, product.summary, "summary")
+    if not isinstance(product.exports, list) or not all(isinstance(e, dict) for e in product.exports):
+        raise ManifestError(f"{manifest}: exports must be a list of tables")
     for export in product.exports:
         for key in ("query", "file"):
             if key not in export:
                 raise ManifestError(f"{manifest}: export without {key!r}")
+        _check_inside(manifest, product, export["query"], "export query")
         name = export["file"]
         if (not isinstance(name, str) or not EXPORT_FILE_PATTERN.fullmatch(name)
                 or name in (".", "..")):
