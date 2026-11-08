@@ -37,5 +37,13 @@
 | T27 | Review G9: invariant file numbers follow the execution order | domain | maksym.shkilov@gmail.com | S | T26 | done | COMMIT |
 | T28 | Review G2: ERP B and credit-side test coverage for the F1-F3 fixes | tests | maksym.shkilov@gmail.com | M | T27, T23 | done | COMMIT |
 | T29 | Review G8: update README, cli.md, data-model.md and sad.md for the fourth invariant and STRING | docs | maksym.shkilov@gmail.com | S | T28 | done | COMMIT |
+| T30 | Review H2: invariant messages survive an empty source_system | domain | maksym.shkilov@gmail.com | S | T29 | done | COMMIT |
+| T31 | Review H3: whitespace-only line number prints as ? in gate and invariant messages | domain | maksym.shkilov@gmail.com | S | T30 | todo | SELECT |
+| T32 | Review H6: non-UTF-8 manifest is a named ManifestError and cannot leave stale outputs | app | maksym.shkilov@gmail.com | S | T31 | todo | SELECT |
+| T33 | Review H7: reject unknown manifest keys and repeated export file names | app | maksym.shkilov@gmail.com | S | T32 | todo | SELECT |
+| T34 | Review H5: path confinement checks the path that is read when {engine} is used | app | maksym.shkilov@gmail.com | S | T33 | todo | SELECT |
+| T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | todo | SELECT |
+| T36 | Review H1: close the surviving test mutants of the F1-F3/G2 fixes | tests | maksym.shkilov@gmail.com | S | T35 | todo | SELECT |
+| T37 | Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code | docs | maksym.shkilov@gmail.com | S | T36 | todo | SELECT |
 
 **Total:** 13 tasks, ~10.5 person-days.

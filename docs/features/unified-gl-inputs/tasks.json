@@ -596,6 +596,158 @@
         "tests/unit/test_readme.py"
       ],
       "status": "done"
+    },
+    {
+      "id": "T30",
+      "title": "Review H2: invariant messages survive an empty source_system",
+      "layer": "domain",
+      "deps": [
+        "T29"
+      ],
+      "acs": [
+        "AC-11",
+        "AC-02",
+        "AC-06"
+      ],
+      "dod": "Mapping and translation invariants print a non-blank offender line for an empty source_system (coalesce '?'); one test each.",
+      "files_hint": [
+        "products/unified_gl/invariants/02_unambiguous_mapping.sql",
+        "products/unified_gl/invariants/03_unambiguous_translation.sql",
+        "tests/unit/test_invariants.py"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T31",
+      "title": "Review H3: whitespace-only line number prints as ? in gate and invariant messages",
+      "layer": "domain",
+      "deps": [
+        "T30"
+      ],
+      "acs": [
+        "AC-08",
+        "AC-06"
+      ],
+      "dod": "A line made of spaces prints as '?' like an empty cell (nullif(trim(..),'') for line_text in both control views, staged copies kept equal); test.",
+      "files_hint": [
+        "products/unified_gl/adapters/duckdb/03_create_control_views.sql",
+        "docs/features/unified-gl-inputs/migrations/03_create_control_views.up.sql",
+        "tests/unit/test_raw_readability.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T32",
+      "title": "Review H6: non-UTF-8 manifest is a named ManifestError and cannot leave stale outputs",
+      "layer": "app",
+      "deps": [
+        "T31"
+      ],
+      "acs": [
+        "AC-12",
+        "AC-13"
+      ],
+      "dod": "Reading product.toml with a non-UTF-8 byte gives exit 3 with the file name in the message; the clean start still removes earlier outputs of active products; test.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T33",
+      "title": "Review H7: reject unknown manifest keys and repeated export file names",
+      "layer": "app",
+      "deps": [
+        "T32"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-11",
+        "AC-12"
+      ],
+      "dod": "Unknown top-level or [[exports]] keys and repeated export file names give ManifestError naming product.toml; shipped manifest still loads; tests.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T34",
+      "title": "Review H5: path confinement checks the path that is read when {engine} is used",
+      "layer": "app",
+      "deps": [
+        "T33"
+      ],
+      "acs": [
+        "AC-13"
+      ],
+      "dod": "A symlinked engine folder pointing outside the product is rejected with a file-named ManifestError; test with a symlink.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T35",
+      "title": "Review H8: exports are written only after every summary and export query succeeded",
+      "layer": "app",
+      "deps": [
+        "T34"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "After exit 3 no export file of this run exists, also when a later export or another product fails; test with a broken second export.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T36",
+      "title": "Review H1: close the surviving test mutants of the F1-F3/G2 fixes",
+      "layer": "tests",
+      "deps": [
+        "T35"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-08",
+        "AC-09"
+      ],
+      "dod": "Each surviving mutant of review r3 H1 turns the suite red: ERP B empty currency/account, credit_total row, habenbetrag typed-view cases, per-source translation, trimmed document; mutants re-run.",
+      "files_hint": [
+        "tests/unit/test_raw_readability.py",
+        "tests/unit/test_ledger_entry.py",
+        "tests/unit/test_gates.py",
+        "tests/unit/test_reports_sql.py",
+        "tests/unit/test_adapter_duckdb.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T37",
+      "title": "Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code",
+      "layer": "docs",
+      "deps": [
+        "T36"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-13"
+      ],
+      "dod": "Blank translation target rule documented; cli.md 3.1 matches 6 on the clean start; data-model rate check says the test suite; OQ-2 reason corrected (debt stays accepted).",
+      "files_hint": [
+        "docs/features/unified-gl-inputs/contracts/cli.md",
+        "docs/features/unified-gl-inputs/data-model.md",
+        "docs/features/unified-gl-inputs/spec.md",
+        "products/unified_gl/README.md"
+      ],
+      "status": "todo"
     }
   ]
 }
