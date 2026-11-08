@@ -198,3 +198,32 @@ def test_a_symlink_in_place_of_the_product_build_folder_is_not_followed(tmp_path
     assert (tmp_path / "build/demo/x.csv").is_file()
     assert (outside / "old.csv").read_text() == "keep"   # the target of the link is left alone
     assert not (outside / "x.csv").exists()
+
+
+# --- review 2026-11-07 round 2, G6: reserved products keep their build folder ----------------
+
+def test_clean_start_leaves_the_build_folder_of_a_reserved_product(tmp_path):
+    from helpers import make_reserved
+    cfg = make_product(tmp_path)
+    make_reserved(tmp_path, "later_product")
+    reserved_dir = tmp_path / "build" / "later_product"
+    reserved_dir.mkdir(parents=True)
+    (reserved_dir / "x").write_text("keep")
+    active_dir = tmp_path / "build" / "demo"
+    active_dir.mkdir()
+    (active_dir / "old.csv").write_text("old")
+    runner.run(cfg)
+    assert (reserved_dir / "x").read_text() == "keep"
+    assert not (active_dir / "old.csv").exists()
+
+
+def test_a_product_with_an_unreadable_manifest_is_still_cleaned(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    stale = tmp_path / "build" / "demo"
+    stale.mkdir(parents=True)
+    (stale / "old.csv").write_text("old")
+    (tmp_path / "products/demo/product.toml").write_text('name = "demo"\n')  # status missing
+    with pytest.raises(ManifestError):
+        runner.run(cfg)
+    assert not stale.exists()

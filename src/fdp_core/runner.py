@@ -9,7 +9,7 @@ from pathlib import Path
 import duckdb
 
 from fdp_core.config import LAYERS, Config
-from fdp_core.errors import InvariantViolation, LayerBuildError, ManifestError
+from fdp_core.errors import FdpError, InvariantViolation, LayerBuildError, ManifestError
 from fdp_core.gates import FAIL, GateResult, run_sql_gate
 from fdp_core.report import write_csv
 
@@ -75,13 +75,23 @@ def _remove(path: Path) -> None:
         shutil.rmtree(path)
 
 
+def _is_reserved(folder: Path) -> bool:
+    """True only when the manifest is readable and says reserved; anything else is cleaned."""
+    try:
+        return _parse_manifest(folder / "product.toml").status == "reserved"
+    except (OSError, tomllib.TOMLDecodeError, FdpError):
+        return False
+
+
 def _clear_earlier_run(cfg: Config) -> None:
-    """Phase 0: nothing of an earlier run survives, whatever happens next (cli.md 3.1, 3.4)."""
+    """Phase 0: nothing of an earlier run survives, whatever happens next (cli.md 3.1, 3.4).
+
+    The build folder of a reserved product is not touched (cli.md 3.1)."""
     cfg.db_path.unlink(missing_ok=True)
     cfg.report_path.unlink(missing_ok=True)
     if cfg.products_dir.is_dir():
         for folder in cfg.products_dir.iterdir():
-            if folder.is_dir():
+            if folder.is_dir() and not _is_reserved(folder):
                 _remove(cfg.product_build_dir(folder.name))
 
 
