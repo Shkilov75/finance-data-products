@@ -27,6 +27,6 @@
 | T17 | Review F4: runner contract — stale files after exit 3, unknown status, file-named errors, manifest path validation | app | maksym.shkilov@gmail.com | M | T16 | done | COMMIT |
 | T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T19 | Review F6: STRING instead of bare VARCHAR in neutral SQL | domain | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
-| T20 | Review F7: remove unused down scripts and 'Staged DDL' headers from products/ | docs | maksym.shkilov@gmail.com | S | T19 | todo | — |
+| T20 | Review F7: remove unused down scripts and 'Staged DDL' headers from products/ | docs | maksym.shkilov@gmail.com | S | T19 | done | COMMIT |
 
 **Total:** 13 tasks, ~10.5 person-days.

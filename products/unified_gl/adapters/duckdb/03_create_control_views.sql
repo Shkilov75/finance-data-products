@@ -1,4 +1,4 @@
--- Staged DDL (engine: duckdb). Control views = raw side of the completeness gate (ADR-0002).
+-- DuckDB adapter. Control views = raw side of the completeness gate (ADR-0002).
 -- Written separately from raw.typed_*: one row per RAW entry (unreadable ones included),
 -- signed_amount NULL when the entry is unreadable (date, key, currency, account or amount), so it counts as an entry but adds to no total.
 -- Independent expressions on purpose: a date is read by formatting the parsed date back to the

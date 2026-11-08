@@ -1,5 +1,4 @@
--- Staged DDL (engine-neutral: DuckDB and Spark SQL). Promoted by `implement` into
--- products/unified_gl/sql/staging/. The aligned entry set (glossary: Aligned entry set).
+-- Engine-neutral SQL (DuckDB and Spark SQL). The aligned entry set (glossary: Aligned entry set).
 -- No PRIMARY KEY / UNIQUE on purpose: uniqueness is an invariant check (ADR-0003) so a repeated key
 -- stops the run with a typed error that names source system, document and line (AC-06),
 -- instead of a generic constraint error from the engine.

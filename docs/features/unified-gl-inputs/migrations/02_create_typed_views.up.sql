@@ -1,4 +1,4 @@
--- Staged DDL (engine: duckdb). Typed views = the view contract of ADR-0001.
+-- DuckDB adapter. Typed views = the view contract of ADR-0001.
 -- The description is kept exactly as written (no trim): the translation matches the whole text.
 -- Contract: fixed names and types; a line is whole digits only (1.5 is unreadable, never rounded); a value that cannot be read in its source format is NULL, never guessed.
 -- ERP A date  DD.MM.YYYY (strict), number German "1.234,56"; at most 2 decimals, no sign.

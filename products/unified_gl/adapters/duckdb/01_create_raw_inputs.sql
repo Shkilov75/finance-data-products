@@ -1,4 +1,4 @@
--- Staged DDL (engine: duckdb). Promoted by `implement` into products/unified_gl/adapters/duckdb/.
+-- DuckDB adapter, raw layer.
 -- Loads the five committed synthetic inputs into schema raw exactly as they arrived (all text).
 -- Paths are relative to the repository root, where `fdp run` is started.
 

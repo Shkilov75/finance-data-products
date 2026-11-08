@@ -426,7 +426,7 @@
         "tests/unit/test_control_views.py",
         "tests/unit/test_ledger_entry.py"
       ],
-      "status": "todo"
+      "status": "done"
     }
   ]
 }
