@@ -137,3 +137,11 @@ def test_only_reserved_products(tmp_path, run_cli):
     assert code == 0
     assert "0 gates run" in out and "reserved: res_a" in out
     assert "source_system" not in out and "records" not in out
+
+
+def test_empty_cell_of_an_invariant_row_is_printed_empty_not_as_none(tmp_path, run_cli):
+    make_product(tmp_path, invariants=["invariants/null_cell.sql"],
+                 files={"invariants/null_cell.sql": "SELECT 'DOC1' AS document, NULL AS line"})
+    code, _out, err = run_cli("run")
+    assert code == 2
+    assert "None" not in err and "  DOC1 " in err + " "

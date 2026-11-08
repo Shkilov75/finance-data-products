@@ -127,6 +127,11 @@ def test_exact_text_is_translated(con):
     ("BA-1", "1", "06.01.2026", "4710", "-10,00", "", "EUR"),   # negative
     ("BA-1", "1", "06.01.2026", "4710", "0,00", "", "EUR"),     # zero
     ("BA-1", "1", "06.01.2026", "4710", "10,005", "", "EUR"),   # 3 decimals
+    ("BA-1", "1", "06.01.2026", "4710", "", "12.5", "EUR"),      # credit: misplaced thousands dot
+    ("BA-1", "1", "06.01.2026", "4710", "", "10,005", "EUR"),    # credit: 3 decimals
+    ("BA-1", "1", "06.01.2026", "4710", "", "1.23,45", "EUR"),   # credit: broken grouping
+    ("BA-1", "1", "06.01.2026", "4710", "", "-5,00", "EUR"),     # credit: negative
+    ("BA-1", "1", "06.01.2026", "4710", "", "0,00", "EUR"),      # credit: zero
     ("BA-1", "1", "06.01.2026", "4710", "10,00", "", ""),       # empty currency (AC-09)
     ("BA-1", "1", "06.01.2026", "", "10,00", "", "EUR"),        # empty account
 ])
@@ -232,3 +237,43 @@ def test_erp_b_translation_needs_exact_whole_text_too(con, memo):
     assert (entry[9], entry[10]) == (memo, memo)    # not translated, kept as the source wrote it
     listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
     assert [r[3] for r in listed] == [memo]
+
+
+# --- review 2026-11-07 round 3, H1: ERP B guards, per-source translation, padded document ----
+
+@pytest.mark.parametrize("currency, account", [("", "4710"), (" ", "4710"), ("USD", ""), ("USD", " ")])
+def test_erp_b_entry_with_empty_currency_or_account_is_absent(con, currency, account):
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("DELETE FROM raw.erp_b_export")
+    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1','01/06/2026',?,"
+                "[{'line_no':'1','account':?,'amount':'10.00','memo':'x'}])", [currency, account])
+    build(con)
+    assert rows(con) == []
+
+
+def test_translation_of_one_source_system_is_not_used_for_the_other(con):
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("DELETE FROM raw.erp_b_export")
+    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1','01/06/2026','USD',"
+                "[{'line_no':'1','account':'4710','amount':'10.00','memo':'Miete Bürogebäude'}])")
+    # the list translates this text for ERP_A only
+    assert con.execute("SELECT count(*) FROM raw.description_translation WHERE source_system = 'ERP_A' "
+                       "AND original_description = 'Miete Bürogebäude'").fetchone() == (1,)
+    con.execute("DELETE FROM raw.description_translation WHERE source_system = 'ERP_B'")
+    build(con)
+    entry = rows(con)[0]
+    assert entry[1] == "ERP_B" and (entry[9], entry[10]) == ("Miete Bürogebäude", "Miete Bürogebäude")
+    listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
+    assert [r[3] for r in listed] == ["Miete Bürogebäude"]
+
+
+def test_padded_document_number_gives_the_same_entry_id_as_the_trimmed_one(con):
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("INSERT INTO raw.erp_a_export VALUES "
+                "('BA-1','1','06.01.2026','4710','10,00','','EUR','x')")
+    build(con)
+    first = rows(con)[0]
+    con.execute("DROP TABLE staging.ledger_entry")
+    con.execute("UPDATE raw.erp_a_export SET belegnummer = '  BA-1 '")
+    build(con)
+    assert rows(con)[0] == first and first[2] == "BA-1"

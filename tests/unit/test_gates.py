@@ -73,6 +73,17 @@ def test_missing_entry_gives_count_and_total_rows_and_a_missing_row(cfg):
     assert "credit_total" not in text  # only a debit was removed
 
 
+def test_missing_credit_entry_gives_a_credit_total_row_and_no_debit_row(cfg):
+    result = mutate_and_gate(cfg, "DELETE FROM staging.ledger_entry WHERE entry_id = ("
+                                  "SELECT entry_id FROM staging.ledger_entry "
+                                  "WHERE source_system = 'ERP_A' AND signed_amount < 0 "
+                                  "ORDER BY source_document, source_line LIMIT 1)")
+    assert result.status == FAIL
+    text = "\n".join(messages(result))
+    assert "ERP_A" in text and "entries: raw" in text and "credit_total: raw" in text
+    assert "debit_total" not in text  # only a credit was removed
+
+
 def test_changed_amount_is_listed_with_totals(cfg):
     result = mutate_and_gate(cfg, "UPDATE staging.ledger_entry SET signed_amount = signed_amount + 1 "
                                   "WHERE entry_id = (SELECT min(entry_id) FROM staging.ledger_entry "

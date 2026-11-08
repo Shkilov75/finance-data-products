@@ -46,9 +46,9 @@ def add_b_documents(cfg, *documents):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def b_doc(doc_id="B9", line_no="1", currency="USD", amount="5.00"):
+def b_doc(doc_id="B9", line_no="1", currency="USD", amount="5.00", account="4710"):
     return {"doc_id": doc_id, "posting_date": "01/06/2026", "currency": currency,
-            "lines": [{"line_no": line_no, "account": "4710", "amount": amount, "memo": "x"}]}
+            "lines": [{"line_no": line_no, "account": account, "amount": amount, "memo": "x"}]}
 
 
 @pytest.mark.parametrize("row, missing", [
@@ -142,3 +142,80 @@ def test_erp_b_blank_line_number_is_printed_as_a_question_mark(cfg):
     add_b_documents(cfg, b_doc(line_no="  "))
     messages = [r[0] for r in runner.run(cfg).gates[0].violations]
     assert "ERP_B B9 line ?: missing in aligned entries" in messages
+
+
+# --- review 2026-11-07 round 3, H1: ERP B and padded values through the real load path --------
+
+def staged_documents(cfg):
+    import duckdb
+    con = duckdb.connect(str(cfg.db_path), read_only=True)
+    try:
+        return [r[0] for r in con.execute(
+            "SELECT source_document FROM staging.ledger_entry WHERE source_system = 'ERP_B'").fetchall()]
+    finally:
+        con.close()
+
+
+@pytest.mark.parametrize("currency", ["", " "])
+def test_erp_b_empty_currency_is_a_readable_gate_finding_and_stays_out_of_staging(cfg, currency):
+    add_b_documents(cfg, b_doc(currency=currency))
+    result = runner.run(cfg).gates[0]
+    messages = [r[0] for r in result.violations]
+    assert result.status == FAIL
+    assert "ERP_B UNKNOWN entries: raw 1, aligned 0" in messages
+    assert "ERP_B B9 line 1: missing in aligned entries" in messages
+    assert all(m for m in messages)
+    assert "B9" not in staged_documents(cfg)
+
+
+@pytest.mark.parametrize("account", ["", " "])
+def test_erp_b_empty_account_is_a_finding_and_stays_out_of_staging(cfg, account):
+    add_b_documents(cfg, b_doc(account=account))
+    messages = [r[0] for r in runner.run(cfg).gates[0].violations]
+    assert "ERP_B B9 line 1: missing in aligned entries" in messages
+    assert "B9" not in staged_documents(cfg)
+
+
+@pytest.mark.parametrize("credit", ["12.5", "10,005", "1.23,45", "-5,00", "0,00"])
+def test_unreadable_credit_amount_is_a_missing_entry_not_a_guessed_amount(cfg, credit):
+    add_rows(cfg, f"BA-9;1;06.01.2026;1200;;{credit};EUR;x")
+    result = runner.run(cfg).gates[0]
+    messages = [r[0] for r in result.violations]
+    assert "ERP_A BA-9 line 1: missing in aligned entries" in messages
+    assert not any("differs" in m or "total: raw" in m for m in messages)
+    import duckdb
+    con = duckdb.connect(str(cfg.db_path), read_only=True)
+    try:
+        assert con.execute("SELECT count(*) FROM staging.ledger_entry "
+                           "WHERE source_document = 'BA-9'").fetchone() == (0,)
+    finally:
+        con.close()
+
+
+def test_padded_document_numbers_are_trimmed_in_both_systems_and_both_gate_sides(cfg):
+    add_rows(cfg, " BA-9 ;1;06.01.2026;4660;5,00;;EUR;x")
+    add_b_documents(cfg, b_doc(doc_id=" B9 "))
+    result = runner.run(cfg).gates[0]
+    assert result.status == "PASS", [r[0] for r in result.violations]
+    import duckdb
+    con = duckdb.connect(str(cfg.db_path), read_only=True)
+    try:
+        docs = {r[0] for r in con.execute("SELECT source_document FROM staging.ledger_entry").fetchall()}
+    finally:
+        con.close()
+    assert {"BA-9", "B9"} <= docs and " BA-9 " not in docs and " B9 " not in docs
+
+
+def test_padded_duplicate_document_and_line_is_found(cfg):
+    add_rows(cfg, "BA-9;1;06.01.2026;4660;5,00;;EUR;a", " BA-9 ;1;06.01.2026;4660;5,00;;EUR;b")
+    with pytest.raises(InvariantViolation) as exc:
+        runner.run(cfg)
+    assert [r[0] for r in exc.value.rows] == ["ERP_A BA-9 line 1 appears 2 times in the export"]
+
+
+def test_unreadable_line_is_printed_trimmed_in_both_systems(cfg):
+    add_rows(cfg, "BA-9; 1.5 ;06.01.2026;4660;5,00;;EUR;x")
+    add_b_documents(cfg, b_doc(line_no=" 1.5 "))
+    messages = [r[0] for r in runner.run(cfg).gates[0].violations]
+    assert "ERP_A BA-9 line 1.5: missing in aligned entries" in messages
+    assert "ERP_B B9 line 1.5: missing in aligned entries" in messages

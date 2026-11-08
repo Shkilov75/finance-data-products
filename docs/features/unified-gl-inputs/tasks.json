@@ -727,7 +727,7 @@
         "tests/unit/test_reports_sql.py",
         "tests/unit/test_adapter_duckdb.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T37",

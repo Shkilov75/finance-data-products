@@ -385,3 +385,29 @@ def test_exports_are_still_written_when_everything_succeeds(tmp_path):
     result = runner.run(cfg)
     assert (tmp_path / "build/demo/first.csv").is_file() and (tmp_path / "build/demo/second.csv").is_file()
     assert [name for name, _ in result.exports] == ["first.csv", "second.csv"]
+
+
+# --- review 2026-11-07 round 3, H1: manifest value shapes and the report file ----------------
+
+def test_an_empty_sql_path_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").write_text('name = "demo"\nstatus = "active"\nsql = [""]\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*non-empty"):
+        runner.discover_products(cfg)
+
+
+def test_an_export_file_that_is_not_a_string_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").write_text(
+        'name = "demo"\nstatus = "active"\n[[exports]]\nquery = "reports/exceptions.sql"\nfile = 7\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*plain file name"):
+        runner.discover_products(cfg)
+
+
+def test_report_json_counts_the_violating_rows_of_a_failed_gate(tmp_path):
+    cfg = make_product(tmp_path, files={"gates/01_g.sql": "SELECT 1 AS a UNION ALL SELECT 2"})
+    runner.run(cfg)
+    assert json.loads(cfg.report_path.read_text()) == [
+        {"gate": "01_g", "status": "FAIL", "violations": 2}]
