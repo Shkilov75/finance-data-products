@@ -51,6 +51,6 @@
 | T41 | Review I5: product name equals its folder name | app | maksym.shkilov@gmail.com | S | T40 | done | COMMIT |
 | T42 | Review I6: a failing export write removes the files already written | app | maksym.shkilov@gmail.com | S | T41 | done | COMMIT |
 | T43 | Review I7: drop the dead export-target check, test an unreadable manifest | app | maksym.shkilov@gmail.com | S | T42 | done | COMMIT |
-| T44 | Review I3: data-model.md describes line_text as NULL when blank | docs | maksym.shkilov@gmail.com | S | T43 | todo | SELECT |
+| T44 | Review I3: data-model.md describes line_text as NULL when blank | docs | maksym.shkilov@gmail.com | S | T43 | done | COMMIT |
 
 **Total:** 13 tasks, ~10.5 person-days.

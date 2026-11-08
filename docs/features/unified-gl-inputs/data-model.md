@@ -213,7 +213,7 @@ One row per **raw** entry, unreadable ones included. Parsing is written separate
 | Column | Type | Notes |
 |---|---|---|
 | `source_system`, `document`, `line`, `currency`, `local_account` | VARCHAR / INTEGER | as in the typed views; `document` is NULL when empty |
-| `line_text` | VARCHAR | trimmed source text of the line, so the invariant «unique document and line» can also find a duplicate whose line is unreadable |
+| `line_text` | VARCHAR | trimmed source text of the line, NULL when blank (printed as `?` in messages), so the invariant «unique document and line» can also find a duplicate whose line is unreadable |
 | `entry_date` | DATE | NULL when unreadable |
 | `signed_amount` | DECIMAL(18,2) | NULL when the entry is unreadable for any reason (date, key, currency, account, amount, both/neither side filled, negative or zero or over-precise amount), so an unreadable entry counts as an entry and adds nothing to the debit and credit totals (AC-09) |
 
