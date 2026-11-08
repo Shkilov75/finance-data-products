@@ -77,3 +77,79 @@ def test_stale_report_and_product_build_folder_removed(tmp_path):
     assert not cfg.report_path.exists()
     assert not stale_dir.exists()
     assert other.exists()
+
+
+# --- review 2026-11-07 F4: runner contract and manifest robustness ---------------------------
+
+def _leave_earlier_run(cfg, name="demo"):
+    build = cfg.root / "build"
+    (build / name).mkdir(parents=True, exist_ok=True)
+    (build / name / "exceptions_report.csv").write_text("old")
+    (build / "report.json").write_text("[]")
+    (build / "fdp.duckdb").write_text("old")
+    (build / "keep.txt").write_text("keep")
+    return build
+
+
+def test_manifest_error_leaves_no_file_of_an_earlier_run(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    build = _leave_earlier_run(cfg)
+    (tmp_path / "products/demo/product.toml").write_text('name = "demo"\n')  # status missing
+    with pytest.raises(ManifestError):
+        runner.run(cfg)
+    assert not (build / "report.json").exists()
+    assert not (build / "demo").exists()
+    assert not (build / "fdp.duckdb").exists()
+    assert (build / "keep.txt").exists()
+
+
+def test_unknown_status_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, status="resrved")
+    with pytest.raises(ManifestError, match="status"):
+        runner.run(cfg)
+
+
+@pytest.mark.parametrize("name", ["", "..", "a/b", "Demo", "demo x"])
+def test_unsafe_product_name_is_a_manifest_error_and_deletes_nothing(tmp_path, name):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    build = _leave_earlier_run(cfg)
+    (tmp_path / "products/demo/product.toml").write_text(
+        f'name = "{name}"\nstatus = "active"\nsql = ["sql/a.sql"]\n')
+    with pytest.raises(ManifestError, match="name"):
+        runner.run(cfg)
+    assert (build / "keep.txt").exists()
+    assert (tmp_path / "products/demo/product.toml").exists()
+
+
+@pytest.mark.parametrize("target", ["../escape.csv", "/tmp/escape.csv", "sub/../../escape.csv"])
+def test_export_file_outside_the_product_build_folder_is_a_manifest_error(tmp_path, target):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, exports=[("reports/exceptions.sql", target)])
+    with pytest.raises(ManifestError, match="export"):
+        runner.run(cfg)
+    assert not (tmp_path / "build/escape.csv").exists()
+
+
+def test_export_without_query_or_file_is_a_manifest_error(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, manifest_extra='[[exports]]\nfile = "x.csv"\n')
+    with pytest.raises(ManifestError, match="query"):
+        runner.run(cfg)
+
+
+@pytest.mark.parametrize("kind, files, kwargs", [
+    ("invariant", {"invariants/broken.sql": "SELECT * FROM nope"}, {"invariants": ["invariants/broken.sql"]}),
+    ("gate", {"gates/broken.sql": "SELECT * FROM nope"}, {"gates": ["gates/broken.sql"]}),
+    ("summary", {"reports/broken.sql": "SELECT * FROM nope"}, {"summary": "reports/broken.sql"}),
+    ("export", {"reports/broken.sql": "SELECT * FROM nope"},
+     {"exports": [("reports/broken.sql", "x.csv")]}),
+])
+def test_sql_failure_in_any_phase_names_the_file(tmp_path, kind, files, kwargs):
+    from fdp_core.errors import LayerBuildError
+    cfg = make_product(tmp_path, files=files, **kwargs)
+    with pytest.raises(LayerBuildError, match=r"demo/.*broken\.sql"):
+        runner.run(cfg)
+    assert not cfg.report_path.exists()

@@ -364,7 +364,7 @@
         "tests/unit/test_runner_phases.py",
         "tests/unit/test_report_cli.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T18",

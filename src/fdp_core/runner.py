@@ -1,5 +1,6 @@
 import contextlib
 import json
+import re
 import shutil
 import tomllib
 from dataclasses import dataclass, field
@@ -11,6 +12,9 @@ from fdp_core.config import LAYERS, Config
 from fdp_core.errors import InvariantViolation, LayerBuildError, ManifestError
 from fdp_core.gates import FAIL, GateResult, run_sql_gate
 from fdp_core.report import write_csv
+
+NAME_PATTERN = re.compile(r"[a-z0-9_]+")
+STATUSES = ("active", "reserved")
 
 
 @dataclass
@@ -25,24 +29,45 @@ class Product:
     exports: list[dict] = field(default_factory=list)
 
 
+def _parse_manifest(manifest: Path) -> Product:
+    data = tomllib.loads(manifest.read_text())
+    try:
+        product = Product(
+            name=data["name"],
+            status=data["status"],
+            path=manifest.parent,
+            sql=data.get("sql", []),
+            gates=data.get("gates", []),
+            invariants=data.get("invariants", []),
+            summary=data.get("summary"),
+            exports=data.get("exports", []),
+        )
+    except KeyError as exc:
+        raise ManifestError(f"{manifest}: missing field {exc}") from exc
+    if not isinstance(product.name, str) or not NAME_PATTERN.fullmatch(product.name):
+        raise ManifestError(f"{manifest}: name {product.name!r} must match [a-z0-9_]+")
+    if product.status not in STATUSES:
+        raise ManifestError(
+            f"{manifest}: status {product.status!r} must be one of {', '.join(STATUSES)}")
+    for export in product.exports:
+        for key in ("query", "file"):
+            if key not in export:
+                raise ManifestError(f"{manifest}: export without {key!r}")
+    return product
+
+
 def discover_products(cfg: Config) -> list[Product]:
-    products = []
-    for manifest in sorted(cfg.products_dir.glob("*/product.toml")):
-        data = tomllib.loads(manifest.read_text())
-        try:
-            products.append(Product(
-                name=data["name"],
-                status=data["status"],
-                path=manifest.parent,
-                sql=data.get("sql", []),
-                gates=data.get("gates", []),
-                invariants=data.get("invariants", []),
-                summary=data.get("summary"),
-                exports=data.get("exports", []),
-            ))
-        except KeyError as exc:
-            raise ManifestError(f"{manifest}: missing field {exc}") from exc
-    return products
+    return [_parse_manifest(m) for m in sorted(cfg.products_dir.glob("*/product.toml"))]
+
+
+def _clear_earlier_run(cfg: Config) -> None:
+    """Phase 0: nothing of an earlier run survives, whatever happens next (cli.md 3.1, 3.4)."""
+    cfg.db_path.unlink(missing_ok=True)
+    cfg.report_path.unlink(missing_ok=True)
+    if cfg.products_dir.is_dir():
+        for folder in cfg.products_dir.iterdir():
+            if folder.is_dir():
+                shutil.rmtree(cfg.product_build_dir(folder.name), ignore_errors=True)
 
 
 def build_layers(cfg: Config, products: list[Product] | None = None) -> duckdb.DuckDBPyConnection:
@@ -77,6 +102,25 @@ def _query(con: duckdb.DuckDBPyConnection, sql: str) -> tuple[list[str], list[tu
     return [d[0] for d in cur.description], cur.fetchall()
 
 
+@contextlib.contextmanager
+def _in_file(product: Product, rel: str):
+    """An engine error while running one SQL file is reported with product and file name (exit 3)."""
+    try:
+        yield
+    except duckdb.Error as exc:
+        raise LayerBuildError(f"{product.name}/{rel}: {exc}") from exc
+
+
+def _export_target(cfg: Config, product: Product, export: dict) -> Path:
+    folder = cfg.product_build_dir(product.name).resolve()
+    target = (folder / export["file"]).resolve()
+    if not target.is_relative_to(folder):
+        raise ManifestError(
+            f"{product.path / 'product.toml'}: export file {export['file']!r} "
+            f"must stay inside build/{product.name}")
+    return target
+
+
 def run(cfg: Config) -> RunResult:
     # Engine files read inputs by paths relative to the repository root.
     with contextlib.chdir(cfg.root):
@@ -84,6 +128,7 @@ def run(cfg: Config) -> RunResult:
 
 
 def _run(cfg: Config) -> RunResult:
+    _clear_earlier_run(cfg)
     products = discover_products(cfg)
     con = build_layers(cfg, products)
     result = RunResult(reserved=sorted(p.name for p in products if p.status == "reserved"))
@@ -91,26 +136,28 @@ def _run(cfg: Config) -> RunResult:
     try:
         for product in active:
             for rel in product.sql:
-                try:
+                with _in_file(product, rel):
                     con.execute(_read(cfg, product, rel))
-                except duckdb.Error as exc:
-                    raise LayerBuildError(f"{product.name}/{rel}: {exc}") from exc
             for rel in product.invariants:
-                rows = con.execute(_read(cfg, product, rel)).fetchall()
+                with _in_file(product, rel):
+                    rows = con.execute(_read(cfg, product, rel)).fetchall()
                 if rows:
                     raise InvariantViolation(f"{product.name}/{rel}", rows)
-            result.gates += [
-                run_sql_gate(con, product.path / rel.replace("{engine}", cfg.engine))
-                for rel in product.gates
-            ]
+            for rel in product.gates:
+                with _in_file(product, rel):
+                    result.gates.append(
+                        run_sql_gate(con, product.path / rel.replace("{engine}", cfg.engine)))
             if product.gates:
                 result.gated_products.append(product.name)
         for product in active:  # phase 5: summary and exports
             if product.summary:
-                result.summaries.append(_query(con, _read(cfg, product, product.summary)))
+                with _in_file(product, product.summary):
+                    result.summaries.append(_query(con, _read(cfg, product, product.summary)))
             for export in product.exports:
-                columns, rows = _query(con, _read(cfg, product, export["query"]))
-                write_csv(cfg.product_build_dir(product.name) / export["file"], columns, rows)
+                target = _export_target(cfg, product, export)
+                with _in_file(product, export["query"]):
+                    columns, rows = _query(con, _read(cfg, product, export["query"]))
+                write_csv(target, columns, rows)
                 result.exports.append((export["file"], len(rows)))
     finally:
         con.close()
