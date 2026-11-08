@@ -176,3 +176,24 @@ def test_staged_down_reverts_cleanly(con):
     con.execute((STAGED / "04_create_staging_ledger_entry.down.sql").read_text())
     assert con.execute("SELECT count(*) FROM information_schema.tables "
                        "WHERE table_schema = 'staging'").fetchone() == (0,)
+
+
+def test_two_entries_of_one_document_with_equal_date_account_and_amount_keep_distinct_ids(con):
+    """AC-06 precondition: only the line tells these two apart (also in ERP B)."""
+    con.execute("DELETE FROM raw.erp_a_export")
+    con.execute("INSERT INTO raw.erp_a_export VALUES "
+                "('BA-1','1','06.01.2026','4710','10,00','','EUR','x'),"
+                "('BA-1','2','06.01.2026','4710','10,00','','EUR','x')")
+    con.execute("DELETE FROM raw.erp_b_export")
+    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1','01/06/2026','USD',["
+                "{'line_no':'1','account':'4710','amount':'10.00','memo':'x'},"
+                "{'line_no':'2','account':'4710','amount':'10.00','memo':'x'}])")
+    build(con)
+    entries = rows(con)
+    assert len(entries) == 4
+    for system in ("ERP_A", "ERP_B"):
+        pair = [r for r in entries if r[1] == system]
+        assert len(pair) == 2
+        assert pair[0][4:9] == pair[1][4:9]          # same date, amount, currency, account, group
+        assert pair[0][0] != pair[1][0]              # but different identifiers
+    assert len({r[0] for r in entries}) == 4

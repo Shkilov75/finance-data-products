@@ -21,13 +21,16 @@ def test_invariant_failure_runs_before_gates_and_stops_later_invariants(tmp_path
         tmp_path,
         invariants=["invariants/bad.sql", "invariants/bad2.sql"],
         gates=["gates/01_g.sql"],
+        files={"gates/01_g.sql": "CREATE TABLE staging.gate_ran AS SELECT 1 AS x;"
+                                 " SELECT * FROM staging.t WHERE x = 0;"},
     )
     with pytest.raises(InvariantViolation):
         runner.run(cfg)
     import duckdb
     con = duckdb.connect(str(cfg.db_path), read_only=True)
     tables = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
-    assert "second_ran" not in tables
+    assert "second_ran" not in tables   # the later invariant did not run
+    assert "gate_ran" not in tables     # and neither did the gate
 
 
 def test_zero_row_invariant_lets_gates_run(tmp_path):

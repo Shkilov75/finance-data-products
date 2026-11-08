@@ -64,7 +64,7 @@ def test_repeated_document_and_line_names_source_document_line(cfg):
            "BA-2026-0001;01;06.01.2026;4660;1,00;;EUR;dup\n")
     err = expect_violation(cfg)
     assert err.label == "unique document and line"
-    assert any("ERP_A" in str(r) and "BA-2026-0001" in str(r) and "1" in str(r) for r in err.rows)
+    assert any("ERP_A BA-2026-0001 line 1 appears 2 times" in str(r) for r in err.rows)
 
 
 def test_line_01_and_1_count_as_the_same_line(cfg):
@@ -155,3 +155,44 @@ def test_repeated_translation_row_is_reported_as_such_not_as_an_entry_id_collisi
     assert err.label == "unambiguous translation"
     assert any("ERP_A" in str(r) and "Miete Bürogebäude" in str(r) and "2 times" in str(r)
                for r in err.rows)
+
+
+# --- the manifest that really ships (review 2026-11-07, F5 b) --------------------------------
+
+@pytest.fixture
+def real_cfg(tmp_path, monkeypatch):
+    """A copy of the product with its own product.toml, not a test manifest."""
+    target = tmp_path / "products/unified_gl"
+    shutil.copytree(REPO / "products/unified_gl", target, ignore=shutil.ignore_patterns("__pycache__"))
+    monkeypatch.chdir(tmp_path)
+    return Config(root=tmp_path)
+
+
+def test_real_manifest_runs_all_invariants_in_the_order_that_matters():
+    product = next(p for p in runner.discover_products(Config(root=REPO)) if p.name == "unified_gl")
+    names = [i.rsplit("/", 1)[-1] for i in product.invariants]
+    assert names[0] == "01_unique_document_and_line.sql"
+    assert set(names) == {"01_unique_document_and_line.sql", "02_unambiguous_mapping.sql",
+                          "04_unambiguous_translation.sql", "03_unique_entry_id.sql"}
+    # a repeated mapping or translation row fans out the join and must be caught before entry ids
+    assert names.index("02_unambiguous_mapping.sql") < names.index("03_unique_entry_id.sql")
+    assert names.index("04_unambiguous_translation.sql") < names.index("03_unique_entry_id.sql")
+
+
+def test_real_manifest_stops_on_a_repeated_mapping_row(real_cfg):
+    append(data(real_cfg, "account_mapping_synthetic.csv"), "ERP_A,4660,OTHER\n")
+    err = expect_violation(real_cfg)
+    assert err.label == "unambiguous mapping"
+    assert any("ERP_A 4660 appears 2 times" in str(r) for r in err.rows)
+
+
+def test_real_manifest_stops_on_a_repeated_document_and_line(real_cfg):
+    append(data(real_cfg, "erp_a_export_synthetic.csv"),
+           "BA-2026-0001;1;06.01.2026;4660;1,00;;EUR;dup\n")
+    err = expect_violation(real_cfg)
+    assert err.label == "unique document and line"
+
+
+def test_real_manifest_stops_on_a_repeated_translation_row(real_cfg):
+    append(data(real_cfg, "description_translation_synthetic.csv"), "ERP_A,Miete Bürogebäude,Rent\n")
+    assert expect_violation(real_cfg).label == "unambiguous translation"

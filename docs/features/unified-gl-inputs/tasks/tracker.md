@@ -25,7 +25,7 @@
 | T15 | Review F2: translate on exact untrimmed text, keep original_description as written | domain | maksym.shkilov@gmail.com | S | T14 | done | COMMIT |
 | T16 | Review F3: empty translation target counts as untranslated; invariant for a repeated translation row | domain | maksym.shkilov@gmail.com | S | T15 | done | COMMIT |
 | T17 | Review F4: runner contract — stale files after exit 3, unknown status, file-named errors, manifest path validation | app | maksym.shkilov@gmail.com | M | T16 | done | COMMIT |
-| T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | todo | — |
+| T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T19 | Review F6: STRING instead of bare VARCHAR in neutral SQL | domain | maksym.shkilov@gmail.com | S | T16 | todo | — |
 | T20 | Review F7: remove unused down scripts and 'Staged DDL' headers from products/ | docs | maksym.shkilov@gmail.com | S | T19 | todo | — |
 
