@@ -9,8 +9,8 @@ files_hint: ["src/fdp_core/errors.py", "src/fdp_core/config.py", "src/fdp_core/r
 owner: "maksym.shkilov@gmail.com"
 estimate: "M"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.

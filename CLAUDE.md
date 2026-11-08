@@ -11,7 +11,7 @@ Finance data products on DuckDB, with SQL quality gates. Architecture: `docs/arc
 ## Commands
 - `make setup` create venv and install with dev extras
 - `make run` build `build/fdp.duckdb` (layers raw, staging, mart) and run all gates
-- `make demo-bad` same with corrupted data (gates are expected to FAIL)
+- `make demo-bad` runs `fdp run --bad`: it takes effect once a product has corrupted data to switch to, and the gates are then expected to FAIL. For `unified_gl` that is roadmap step 4; until then the flag does nothing and the run exits 0 like `make run`
 - `make test` (`pytest`), `make lint` (`ruff check .`)
 
 ## Conventions

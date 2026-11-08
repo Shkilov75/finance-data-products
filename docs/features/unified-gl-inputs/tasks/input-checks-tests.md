@@ -9,8 +9,8 @@ files_hint: ["tests/unit/test_inputs.py"]
 owner: "maksym.shkilov@gmail.com"
 estimate: "S"
 context_budget: "S"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.

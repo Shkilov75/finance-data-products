@@ -12,6 +12,7 @@ def repo_root() -> Path:
 class Config:
     root: Path
     bad: bool = False
+    engine: str = "duckdb"
 
     @property
     def products_dir(self) -> Path:
@@ -24,3 +25,6 @@ class Config:
     @property
     def report_path(self) -> Path:
         return self.root / "build" / "report.json"
+
+    def product_build_dir(self, product: str) -> Path:
+        return self.root / "build" / product

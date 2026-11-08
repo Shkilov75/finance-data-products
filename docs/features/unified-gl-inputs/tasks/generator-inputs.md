@@ -9,8 +9,8 @@ files_hint: ["products/unified_gl/data/generate.py", "products/unified_gl/data/"
 owner: "maksym.shkilov@gmail.com"
 estimate: "L"
 context_budget: "M"
-status: "todo"
-step: ""
+status: "done"
+step: "COMMIT"
 ---
 
 <!-- Self-contained task. Inlined chunks carry a provenance signature; the source always wins.

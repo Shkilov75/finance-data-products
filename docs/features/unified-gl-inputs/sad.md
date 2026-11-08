@@ -107,7 +107,7 @@ C4Context
 
 1. **Engine differences stay behind a view contract** — each engine adapter loads the raw files as they arrived, flattens the nested export and exposes flat views with fixed names and column types; the neutral product SQL starts from those views and never sees a date or number string. Serves Portability (§1 goal 3) and the no-guessing rule of AC-09. → feature ADR-0001.
 2. **The completeness gate has its own path to the raw data** — the raw side of the gate (counts, separate debit and credit totals, per-entry comparison) is computed by control views that parse the raw tables separately from the alignment, so a parsing defect cannot pass on both sides. Serves Completeness (§1 goal 1). → feature ADR-0002.
-3. **Broken keys and ambiguous mappings stop the run** — duplicate document and line, duplicate entry identifier and a local account listed more than once in the account mapping are declared as zero-row SQL invariant checks in the product manifest; the core raises a typed error and exits with a different code than a failed gate. Serves Completeness and Reproducibility (identifiers must be unique and stable). → feature ADR-0003.
+3. **Broken keys and ambiguous mappings stop the run** — duplicate document and line, duplicate entry identifier, a local account listed more than once in the account mapping and an original description listed more than once in the translation list are declared as zero-row SQL invariant checks in the product manifest; the core raises a typed error and exits with a different code than a failed gate. Serves Completeness and Reproducibility (identifiers must be unique and stable). → feature ADR-0003.
 4. **Products declare what to report, the core renders it** — the manifest names a summary query and the CSV exports; the core prints the table, the violating rows of a failed gate, the reserved products, and writes files only into `build/`. Serves the Reviewer's one-command experience (AC-01, AC-13) without copying output code into products. → feature ADR-0004.
 
 Inherited, not re-decided: Python and DuckDB with SQL files (repo ADR-0001), `products/<name>/` plus `src/fdp_core/` (repo ADR-0002), rebuilt layers with hash identifiers and no migration tool (repo ADR-0003), shared dialect-neutral SQL (repo ADR-0004). Each tactical decision in later sections should trace to one of these seeds or to those repository ADRs; a tactical decision that contradicts one is a red flag to surface in §11.
@@ -132,7 +132,7 @@ products/unified_gl/
 │   ├── duckdb/     + raw load, flatten of ERP B, typed views, control views (ADR-0001, ADR-0002)
 │   └── databricks/ + same view contract, written and verified at roadmap step 6 (the top-level `databricks/` folder keeps only the code that submits SQL to the workspace)
 ├── sql/staging/    + neutral SQL: staging.ledger_entry (the aligned entry set)
-├── invariants/     + zero-row checks: unique document and line, unique entry id, unambiguous mapping (ADR-0003)
+├── invariants/     + zero-row checks: unique document and line, unambiguous mapping, unambiguous translation, unique entry id, in that order (ADR-0003)
 ├── gates/          + 01_completeness.sql, 02_mapping.sql
 ├── reports/        + summary.sql, exceptions_report.sql (ADR-0004)
 ├── data/           + generate.py and the committed synthetic files (names contain "synthetic")

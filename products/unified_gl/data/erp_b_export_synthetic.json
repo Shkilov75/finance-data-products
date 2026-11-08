@@ -1,0 +1,1268 @@
+[
+  {
+    "doc_id": "B000001",
+    "posting_date": "03/10/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "17,899.76",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-17,899.76",
+        "memo": "Sales trip expenses"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000002",
+    "posting_date": "01/14/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "24,971.34",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "5010",
+        "amount": "4,560.67",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-29,532.01",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000003",
+    "posting_date": "01/25/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "1,299.05",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-1,299.05",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000004",
+    "posting_date": "01/02/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "14,064.82",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-14,064.82",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000005",
+    "posting_date": "02/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "10,705.59",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-10,705.59",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000006",
+    "posting_date": "02/21/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "11,070.68",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-11,070.68",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000007",
+    "posting_date": "01/13/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-16,151.47",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "16,151.47",
+        "memo": "Software subscription"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000008",
+    "posting_date": "01/29/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-14,135.52",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "14,135.52",
+        "memo": "Sales trip expenses"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000009",
+    "posting_date": "03/06/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-23,049.85",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-18,622.21",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "41,672.06",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000010",
+    "posting_date": "03/02/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "10,067.19",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-10,067.19",
+        "memo": "Software subscription"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000011",
+    "posting_date": "03/25/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-7,675.47",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-4,915.27",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "12,590.74",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000012",
+    "posting_date": "03/03/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "13,796.40",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-13,796.40",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000013",
+    "posting_date": "03/24/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "13,789.66",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "5010",
+        "amount": "19,808.33",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-33,597.99",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000014",
+    "posting_date": "03/27/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "19,363.29",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "4710",
+        "amount": "3,473.89",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-22,837.18",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000015",
+    "posting_date": "03/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "13,890.32",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "2",
+        "account": "6030",
+        "amount": "855.77",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "3",
+        "account": "2010",
+        "amount": "-14,746.09",
+        "memo": "Sales trip expenses"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000016",
+    "posting_date": "02/21/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "10,248.58",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-10,248.58",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000017",
+    "posting_date": "01/16/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "9,664.91",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-9,664.91",
+        "memo": "Software subscription"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000018",
+    "posting_date": "03/30/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "14,376.12",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-14,376.12",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000019",
+    "posting_date": "01/02/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-8,538.12",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-3,878.94",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "3",
+        "account": "1210",
+        "amount": "12,417.06",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000020",
+    "posting_date": "01/28/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "13,247.97",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-13,247.97",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000021",
+    "posting_date": "03/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-9,685.86",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "9,685.86",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000022",
+    "posting_date": "02/11/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "7,397.28",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "5010",
+        "amount": "19,085.45",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-26,482.73",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000023",
+    "posting_date": "03/17/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "16,524.67",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-16,524.67",
+        "memo": "Sales trip expenses"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000024",
+    "posting_date": "03/05/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "19,841.98",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-19,841.98",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000025",
+    "posting_date": "03/29/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "24,307.58",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "4710",
+        "amount": "7,652.77",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-31,960.35",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000026",
+    "posting_date": "03/15/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-6,597.86",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "6,597.86",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000027",
+    "posting_date": "01/12/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6010",
+        "amount": "10,176.97",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-10,176.97",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000028",
+    "posting_date": "01/19/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-23,611.98",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "23,611.98",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000029",
+    "posting_date": "03/05/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "14,836.21",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "6020",
+        "amount": "9,372.63",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "3",
+        "account": "2010",
+        "amount": "-24,208.84",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000030",
+    "posting_date": "03/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "489.62",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "2",
+        "account": "6010",
+        "amount": "9,789.50",
+        "memo": "Sales trip expenses"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-10,279.12",
+        "memo": "Sales trip expenses"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000031",
+    "posting_date": "01/31/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "9,524.85",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "6030",
+        "amount": "13,986.66",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "3",
+        "account": "2010",
+        "amount": "-23,511.51",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000032",
+    "posting_date": "02/24/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "11,852.53",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-11,852.53",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000033",
+    "posting_date": "03/13/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-15,600.19",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "15,600.19",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000034",
+    "posting_date": "02/13/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6010",
+        "amount": "4,869.47",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "6010",
+        "amount": "7,727.91",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "3",
+        "account": "2010",
+        "amount": "-12,597.38",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000035",
+    "posting_date": "01/25/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "16,340.31",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-16,340.31",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000036",
+    "posting_date": "03/23/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "6,853.34",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "5010",
+        "amount": "16,531.67",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-23,385.01",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000037",
+    "posting_date": "03/21/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-5,851.88",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-12,887.81",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "18,739.69",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000038",
+    "posting_date": "03/28/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "17,066.46",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-17,066.46",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000039",
+    "posting_date": "03/26/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "11,229.92",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-11,229.92",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000040",
+    "posting_date": "01/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "7,474.92",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-7,474.92",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000041",
+    "posting_date": "01/05/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6010",
+        "amount": "9,470.35",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-9,470.35",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000042",
+    "posting_date": "03/27/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-17,132.50",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-599.38",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "3",
+        "account": "1210",
+        "amount": "17,731.88",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000043",
+    "posting_date": "01/23/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "20,518.23",
+        "memo": "Client invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-20,518.23",
+        "memo": "Client invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000044",
+    "posting_date": "03/19/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "23,747.46",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-23,747.46",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000045",
+    "posting_date": "01/21/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "3,884.11",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-3,884.11",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000046",
+    "posting_date": "02/15/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "997.68",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-997.68",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000047",
+    "posting_date": "03/28/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6040",
+        "amount": "19,473.61",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "6030",
+        "amount": "11,419.75",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-30,893.36",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000048",
+    "posting_date": "01/30/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "22,174.60",
+        "memo": "Office supplies"
+      },
+      {
+        "line_no": "2",
+        "account": "6020",
+        "amount": "13,807.54",
+        "memo": "Office supplies"
+      },
+      {
+        "line_no": "3",
+        "account": "2010",
+        "amount": "-35,982.14",
+        "memo": "Office supplies"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000049",
+    "posting_date": "02/28/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "8,978.13",
+        "memo": "Warehouse rent"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-8,978.13",
+        "memo": "Warehouse rent"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000050",
+    "posting_date": "03/19/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-22,151.93",
+        "memo": "Advertising campaign"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "22,151.93",
+        "memo": "Advertising campaign"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000051",
+    "posting_date": "02/20/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "8,100.16",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-8,100.16",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000052",
+    "posting_date": "01/31/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6030",
+        "amount": "7,625.99",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-7,625.99",
+        "memo": "Software subscription"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000053",
+    "posting_date": "01/13/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-8,334.55",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-8,701.67",
+        "memo": "Vendor invoice"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "17,036.22",
+        "memo": "Vendor invoice"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000054",
+    "posting_date": "01/10/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-17,720.82",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "2",
+        "account": "4010",
+        "amount": "-24,132.88",
+        "memo": "Software subscription"
+      },
+      {
+        "line_no": "3",
+        "account": "1210",
+        "amount": "41,853.70",
+        "memo": "Software subscription"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000055",
+    "posting_date": "01/26/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4710",
+        "amount": "23,243.69",
+        "memo": "Bank charges"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-23,243.69",
+        "memo": "Bank charges"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000056",
+    "posting_date": "03/25/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6010",
+        "amount": "6,221.29",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-6,221.29",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000057",
+    "posting_date": "02/13/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "4010",
+        "amount": "-23,300.46",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "1210",
+        "amount": "23,300.46",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000058",
+    "posting_date": "01/26/2026",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "5010",
+        "amount": "2,994.49",
+        "memo": "Client payment"
+      },
+      {
+        "line_no": "2",
+        "account": "2010",
+        "amount": "-2,994.49",
+        "memo": "Client payment"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000059",
+    "posting_date": "03/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6020",
+        "amount": "17,165.48",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "6030",
+        "amount": "9,999.89",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "3",
+        "account": "1010",
+        "amount": "-27,165.37",
+        "memo": "Payroll run"
+      }
+    ]
+  },
+  {
+    "doc_id": "B000060",
+    "posting_date": "02/01/2026",
+    "currency": "USD",
+    "lines": [
+      {
+        "line_no": "1",
+        "account": "6010",
+        "amount": "7,566.08",
+        "memo": "Payroll run"
+      },
+      {
+        "line_no": "2",
+        "account": "1010",
+        "amount": "-7,566.08",
+        "memo": "Payroll run"
+      }
+    ]
+  }
+]

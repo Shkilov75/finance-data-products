@@ -82,7 +82,7 @@ erDiagram
 
 ## Entities
 
-Types are written in the neutral vocabulary both engines accept (`VARCHAR`, `INTEGER`, `DECIMAL(18,2)`, `DATE`, `BOOLEAN`). `VARCHAR` carries no length: the spec gives no length limit (AC validation limits are all about dates and amounts) and Spark stores strings unbounded.
+Types in the neutral SQL (`staging.ledger_entry`, gates, invariants, reports) use the vocabulary both engines accept: `STRING`, `INTEGER`, `DECIMAL(18,2)`, `DATE`, `BOOLEAN`. Spark SQL rejects `VARCHAR` without a length, and the spec gives no length limit (AC validation limits are all about dates and amounts), so text is `STRING` (an alias of `VARCHAR` in DuckDB). The `raw` tables are created in the engine adapters, which may use the engine's own type name (`VARCHAR` in the DuckDB adapter); the tables below write `VARCHAR` for raw text columns.
 
 ### `raw.erp_a_export`
 
@@ -144,8 +144,8 @@ File: `products/unified_gl/data/description_translation_synthetic.csv`.
 
 **Aggregate root:** root.
 **Access patterns:** lookup by `(source_system, original_description)` → alignment join and the exceptions report.
-**Constraints:** `(source_system, original_description)` unique by construction of the generator (a duplicate would multiply entries and be caught by the invariant «unique entry id»).
-**Design note:** ERP B is already in English, so the generator writes identity rows (`original = common`) for its descriptions. This keeps the neutral SQL uniform: one left join for both systems, and «no translation row» always means «exceptions report», without a per-system language rule.
+**Constraints:** `(source_system, original_description)` unique by construction of the generator (a duplicate would multiply entries; the invariant «unambiguous translation» stops the run first and names the repeated description, so it is never reported as a repeated entry id).
+**Design note:** ERP B is already in English, so the generator writes identity rows (`original = common`) for its descriptions. This keeps the neutral SQL uniform: one left join for both systems, and «no translation» (no row, or a row whose translation is empty or only spaces) always means «exceptions report», without a per-system language rule.
 
 ### `raw.exchange_rate`
 
@@ -159,7 +159,7 @@ File: `products/unified_gl/data/rates_synthetic.csv` (name fixed by AC-05 after 
 
 **Aggregate root:** root.
 **Access patterns:** none in this step.
-**Constraints:** none; completeness of rates (exactly one rate per currency and day) is checked by the generator's input checks (SAD Flow 3), not by the product run.
+**Constraints:** none; completeness of rates (exactly one rate per currency and day) is checked by the test suite (cli.md §5, SAD Flow 3), not by the generator and not by the product run.
 
 ### `staging.ledger_entry` (aligned entry set)
 
@@ -167,17 +167,17 @@ Created in neutral SQL (`products/unified_gl/sql/staging/`), one row per accepte
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
-| `entry_id` | VARCHAR | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06); `source_line` is hashed as an integer, so «01» and «1» give the same identifier, the document as written in the source with trimmed spaces |
-| `source_system` | VARCHAR | NOT NULL | `ERP_A` or `ERP_B` (US-04) |
-| `source_document` | VARCHAR | NOT NULL | original document number (US-04) |
+| `entry_id` | STRING | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06); `source_line` is hashed as an integer, so «01» and «1» give the same identifier, the document as written in the source with trimmed spaces |
+| `source_system` | STRING | NOT NULL | `ERP_A` or `ERP_B` (US-04) |
+| `source_document` | STRING | NOT NULL | original document number (US-04) |
 | `source_line` | INTEGER | NOT NULL | original line number (US-04) |
 | `entry_date` | DATE | NOT NULL | real calendar date (AC-02) |
 | `signed_amount` | DECIMAL(18,2) | NOT NULL, ≠ 0 | debit positive, credit negative; scale 2, never rounded (spec §6) |
-| `transaction_currency` | VARCHAR | NOT NULL | EUR, GBP or USD in the data; the run summary lists the currencies found here (AC-14) |
-| `local_account` | VARCHAR | NOT NULL | account in the source's own chart |
-| `group_account` | VARCHAR | NULL allowed | NULL = no mapping row; the mapping gate fails on it (AC-10) |
-| `description` | VARCHAR | NOT NULL | common language; the original text when no translation exists (AC-02) |
-| `original_description` | VARCHAR | NOT NULL | the source's text; needed by the exceptions report, which cannot tell «untranslated» from «translated» using `description` alone |
+| `transaction_currency` | STRING | NOT NULL | EUR, GBP or USD in the data; the run summary lists the currencies found here (AC-14) |
+| `local_account` | STRING | NOT NULL | account in the source's own chart |
+| `group_account` | STRING | NULL allowed | NULL = no mapping row; the mapping gate fails on it (AC-10) |
+| `description` | STRING | NOT NULL | common language; the original text when no translation exists, including a translation row whose text is empty or only spaces (AC-02) |
+| `original_description` | STRING | NOT NULL | the source's text; needed by the exceptions report, which cannot tell «untranslated» from «translated» using `description` alone |
 
 **Aggregate root:** root (no children).
 **Access patterns:** see «Access paths» below.
@@ -196,10 +196,10 @@ Views are not stored data; they are the contract between the adapters and the ne
 |---|---|---|---|
 | both | `source_system` | VARCHAR | constant `ERP_A` / `ERP_B` |
 | both | `document` | VARCHAR | trimmed |
-| both | `line` | INTEGER | NULL when not an integer |
+| both | `line` | INTEGER | NULL unless the trimmed text is whole digits only (`1.5`, `+1`, `x` are unreadable, never rounded) |
 | both | `entry_date` | DATE | NULL when not exactly the source format or not a real date |
 | both | `currency`, `local_account` | VARCHAR | NULL when empty |
-| both | `description` | VARCHAR | trimmed, empty string when absent |
+| both | `description` | VARCHAR | exactly as written (not trimmed), empty string when absent |
 | `typed_erp_a` | `debit_filled`, `credit_filled` | BOOLEAN | the source cell is not empty. Needed so that «debit filled but unreadable» is not mistaken for «debit empty» (AC-09: both filled is unreadable) |
 | `typed_erp_a` | `debit`, `credit` | DECIMAL(18,2) | NULL when the cell is empty or not a non-negative number with at most 2 decimals in German format |
 | `typed_erp_b` | `amount` | DECIMAL(18,2) | NULL when not a number with at most 2 decimals in US format; sign is kept |
@@ -212,7 +212,8 @@ One row per **raw** entry, unreadable ones included. Parsing is written separate
 
 | Column | Type | Notes |
 |---|---|---|
-| `source_system`, `document`, `line`, `currency`, `local_account` | VARCHAR / INTEGER | as in the typed views |
+| `source_system`, `document`, `line`, `currency`, `local_account` | VARCHAR / INTEGER | as in the typed views; `document` is NULL when empty |
+| `line_text` | VARCHAR | trimmed source text of the line, NULL when blank (printed as `?` in messages), so the invariant «unique document and line» can also find a duplicate whose line is unreadable |
 | `entry_date` | DATE | NULL when unreadable |
 | `signed_amount` | DECIMAL(18,2) | NULL when the entry is unreadable for any reason (date, key, currency, account, amount, both/neither side filled, negative or zero or over-precise amount), so an unreadable entry counts as an entry and adds nothing to the debit and credit totals (AC-09) |
 

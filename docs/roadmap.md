@@ -1,6 +1,6 @@
 ---
 status: living
-updated_at: "2026-11-04"
+updated_at: "2026-11-08"
 ---
 
 # Roadmap — finance-data-products
@@ -20,9 +20,9 @@ A reviewer can clone the repo, run one command and watch Unified GL turn two ERP
 | # | Step | Source | Size | Status |
 |---|---|---|:---:|---|
 | 1 | Scaffold: repo skeleton with `fdp_core`, Makefile, pytest, CI and the four reserved product folders | architecture-map.md "Module inventory" | S | idea |
-| 2 | Unified GL, inputs: two synthetic ERP exports in different formats and currencies loaded through raw and staging | idea-brief.md §1 Raw idea (product 1) | M | spec'd — [features/unified-gl-inputs](features/unified-gl-inputs/spec.md) |
+| 2 | Unified GL, inputs: two synthetic ERP exports in different formats and currencies loaded through raw and staging | idea-brief.md §1 Raw idea (product 1) | M | shipped — [features/unified-gl-inputs](features/unified-gl-inputs/spec.md) |
 | 3 | Unified GL, ledger: convert to USD, gate "rate exists on date", gate "totals reconcile before/after conversion", publish the mart, `make run` end to end | idea-brief.md §2 Problem (criterion a) | M | idea |
-| 4 | Unified GL, proof: `make demo-bad` plus red and green tests show the gates fail on corrupted data | idea-brief.md §2 Problem (criterion b) | S | idea |
+| 4 | Unified GL, proof: `make demo-bad` plus red and green tests show the gates fail on corrupted data. Includes wiring `--bad`: the flag is parsed (`Config.bad`) but the runner ignores it, so today `make demo-bad` exits 0 (found in review of unified-gl-inputs, 2026-11-07) | idea-brief.md §2 Problem (criterion b) | S | idea |
 | 5 | Unified GL, reader view: product README with diagram and sample output, plus the repo front page with the product map | idea-brief.md §2 Problem (criterion c) | S | idea |
 | 6 | Databricks path: thin adapter that runs the same product SQL on Databricks | idea-brief.md §7 Recommendation | M | idea |
 | 7 | Cost center model: reference model from synthetic CSV with gates for unique ID, required fields, valid owner | idea-brief.md §1 Raw idea (product 2) | S | idea |
@@ -91,3 +91,4 @@ Zones are marked `(new)` because the repo has no code yet; they come from the ta
 
 | Step | Shipped | Link |
 |---|---|---|
+| 2 · Unified GL, inputs | 2026-11-08 | [changelog](features/unified-gl-inputs/changelog.md) · [PR #1](https://github.com/Shkilov75/finance-data-products/pull/1) |
