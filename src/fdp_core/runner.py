@@ -41,8 +41,8 @@ def _check_inside(manifest: Path, product: Product, rel: object, what: str) -> N
 
 def _parse_manifest(manifest: Path) -> Product:
     try:
-        data = tomllib.loads(manifest.read_text())
-    except tomllib.TOMLDecodeError as exc:
+        data = tomllib.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
         raise ManifestError(f"{manifest}: {exc}") from exc
     try:
         product = Product(

@@ -273,3 +273,33 @@ def test_sql_path_outside_the_product_folder_is_a_manifest_error(tmp_path, field
     with pytest.raises(ManifestError, match="inside the product folder"):
         runner.run(cfg)
     assert not cfg.db_path.exists()   # rejected while reading manifests, before any SQL ran
+
+
+# --- review 2026-11-07 round 3, H6: a manifest that is not UTF-8 -----------------------------
+
+def test_manifest_that_is_not_utf8_is_a_manifest_error_naming_the_file(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    stale = tmp_path / "build" / "demo"
+    stale.mkdir(parents=True)
+    (stale / "old.csv").write_text("old")
+    (tmp_path / "products/demo/product.toml").write_bytes(
+        b'name = "demo"\nstatus = "active"\n# B\xfcro\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml"):
+        runner.run(cfg)
+    assert not stale.exists()
+
+
+def test_unreadable_reserved_manifest_does_not_keep_stale_files_of_an_active_product(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    for name in ("aaa_bad", "zzz_bad"):   # one before and one after `demo` in any folder order
+        folder = tmp_path / "products" / name
+        folder.mkdir()
+        (folder / "product.toml").write_bytes(b'name = "x"\nstatus = "reserved"\n# B\xe9\n')
+    stale = tmp_path / "build" / "demo"
+    stale.mkdir(parents=True)
+    (stale / "old.csv").write_text("old")
+    with pytest.raises(ManifestError, match=r"(aaa|zzz)_bad/product\.toml"):
+        runner.run(cfg)
+    assert not stale.exists()
