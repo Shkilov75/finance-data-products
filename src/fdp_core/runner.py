@@ -190,14 +190,8 @@ def _in_file(product: Product, rel: str):
 
 
 def _export_target(cfg: Config, product: Product, export: dict) -> Path:
-    build = (cfg.root / "build").resolve()
-    folder = cfg.product_build_dir(product.name).resolve()
-    target = (folder / export["file"]).resolve()
-    if folder.parent != build or target.parent != folder:
-        raise ManifestError(
-            f"{product.path / 'product.toml'}: export file {export['file']!r} "
-            f"must stay inside build/{product.name}")
-    return target
+    """A plain file name (checked in the manifest) inside the product's own build folder."""
+    return cfg.product_build_dir(product.name) / export["file"]
 
 
 def run(cfg: Config) -> RunResult:

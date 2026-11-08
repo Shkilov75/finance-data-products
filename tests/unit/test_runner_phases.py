@@ -494,3 +494,15 @@ def test_a_failing_second_write_removes_the_file_already_written(tmp_path, monke
     assert not (tmp_path / "build/demo/first.csv").exists()
     assert not (tmp_path / "build/demo/second.csv").exists()
     assert not cfg.report_path.exists()
+
+
+# --- review 2026-11-07 round 4, I7: a manifest that cannot be opened ---------------------------
+
+def test_a_manifest_that_cannot_be_opened_is_a_manifest_error_naming_the_file(tmp_path):
+    from fdp_core.errors import FdpError, ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").unlink()
+    (tmp_path / "products/demo/product.toml").mkdir()   # opening a folder fails with OSError
+    with pytest.raises(ManifestError, match=r"demo/product\.toml") as exc:
+        runner.discover_products(cfg)
+    assert isinstance(exc.value, FdpError)
