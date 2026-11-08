@@ -46,30 +46,30 @@ total_diff AS (
 ),
 findings AS (
     SELECT 1 AS grp, source_system AS k1, currency AS k2, 1 AS k3,
-           source_system || ' ' || currency || ' entries: raw ' || CAST(raw_entries AS VARCHAR)
-           || ', aligned ' || CAST(aligned_entries AS VARCHAR) AS message
+           source_system || ' ' || currency || ' entries: raw ' || CAST(raw_entries AS STRING)
+           || ', aligned ' || CAST(aligned_entries AS STRING) AS message
     FROM total_diff WHERE raw_entries <> aligned_entries
     UNION ALL
     SELECT 1, source_system, currency, 2,
-           source_system || ' ' || currency || ' debit_total: raw ' || CAST(raw_debit AS VARCHAR)
-           || ', aligned ' || CAST(aligned_debit AS VARCHAR)
+           source_system || ' ' || currency || ' debit_total: raw ' || CAST(raw_debit AS STRING)
+           || ', aligned ' || CAST(aligned_debit AS STRING)
     FROM total_diff WHERE raw_debit <> aligned_debit
     UNION ALL
     SELECT 1, source_system, currency, 3,
-           source_system || ' ' || currency || ' credit_total: raw ' || CAST(raw_credit AS VARCHAR)
-           || ', aligned ' || CAST(aligned_credit AS VARCHAR)
+           source_system || ' ' || currency || ' credit_total: raw ' || CAST(raw_credit AS STRING)
+           || ', aligned ' || CAST(aligned_credit AS STRING)
     FROM total_diff WHERE raw_credit <> aligned_credit
     UNION ALL
     SELECT 2, r.source_system, coalesce(r.document, '?'), coalesce(r.line, -1),
            r.source_system || ' ' || coalesce(r.document, '?') || ' line '
-           || coalesce(CAST(r.line AS VARCHAR), '?') || ': missing in aligned entries'
+           || coalesce(CAST(r.line AS STRING), '?') || ': missing in aligned entries'
     FROM raw_entry AS r
     LEFT JOIN aligned AS a
            ON a.source_system = r.source_system AND a.document = r.document AND a.line = r.line
     WHERE a.document IS NULL
     UNION ALL
     SELECT 3, a.source_system, a.document, a.line,
-           a.source_system || ' ' || a.document || ' line ' || CAST(a.line AS VARCHAR)
+           a.source_system || ' ' || a.document || ' line ' || CAST(a.line AS STRING)
            || ': in aligned entries but not in raw data'
     FROM aligned AS a
     LEFT JOIN raw_entry AS r
@@ -77,25 +77,25 @@ findings AS (
     WHERE r.document IS NULL
     UNION ALL
     SELECT 4, r.source_system, r.document, r.line,
-           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS VARCHAR)
-           || ': entry_date differs: raw ' || coalesce(CAST(r.entry_date AS VARCHAR), 'unreadable')
-           || ', aligned ' || CAST(a.entry_date AS VARCHAR)
+           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS STRING)
+           || ': entry_date differs: raw ' || coalesce(CAST(r.entry_date AS STRING), 'unreadable')
+           || ', aligned ' || CAST(a.entry_date AS STRING)
     FROM raw_entry AS r
     JOIN aligned AS a
       ON a.source_system = r.source_system AND a.document = r.document AND a.line = r.line
     WHERE r.entry_date IS DISTINCT FROM a.entry_date
     UNION ALL
     SELECT 5, r.source_system, r.document, r.line,
-           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS VARCHAR)
-           || ': signed_amount differs: raw ' || coalesce(CAST(r.signed_amount AS VARCHAR), 'unreadable')
-           || ', aligned ' || CAST(a.signed_amount AS VARCHAR)
+           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS STRING)
+           || ': signed_amount differs: raw ' || coalesce(CAST(r.signed_amount AS STRING), 'unreadable')
+           || ', aligned ' || CAST(a.signed_amount AS STRING)
     FROM raw_entry AS r
     JOIN aligned AS a
       ON a.source_system = r.source_system AND a.document = r.document AND a.line = r.line
     WHERE r.signed_amount IS DISTINCT FROM a.signed_amount
     UNION ALL
     SELECT 6, r.source_system, r.document, r.line,
-           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS VARCHAR)
+           r.source_system || ' ' || r.document || ' line ' || CAST(r.line AS STRING)
            || ': local_account differs: raw ' || coalesce(r.local_account, 'unreadable')
            || ', aligned ' || a.local_account
     FROM raw_entry AS r
