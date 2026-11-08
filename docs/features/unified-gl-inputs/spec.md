@@ -202,4 +202,6 @@ Traceability: idea-brief §5 fixes synthetic data and the demo purpose; §6 risk
 
 ## 8. Open questions
 
-None open.
+| # | Question / deferred item | Owner | Due |
+|---|---|---|---|
+| OQ-1 | Review 2026-11-07 (deferred, low priority): AC-12 has no automated test that a run needs no accounts, network or credentials (run with an emptied environment); the end-to-end test writes to the repository's `build/` instead of a temporary build folder (`tests/integration/conftest.py:29-35`). | maksym.shkilov@gmail.com | 2026-11-10 |
