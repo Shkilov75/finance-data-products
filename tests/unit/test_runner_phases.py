@@ -422,3 +422,30 @@ def test_export_files_that_differ_only_in_case_are_a_manifest_error(tmp_path):
     with pytest.raises(ManifestError, match=r"demo/product\.toml.*X\.csv.*twice"):
         runner.run(cfg)
     assert not cfg.db_path.exists()
+
+
+# --- review 2026-11-07 round 4, I4: a path that cannot be resolved is a named manifest error --
+
+@pytest.mark.parametrize("key", ["sql", "gates", "invariants"])
+def test_a_nul_in_a_manifest_path_is_a_manifest_error_naming_the_file(tmp_path, key):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path)
+    (tmp_path / "products/demo/product.toml").write_text(
+        f'name = "demo"\nstatus = "active"\n{key} = ["a\\u0000b"]\n')
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*a\\x00b"):
+        runner.discover_products(cfg)
+
+
+def test_a_nul_in_a_reserved_manifest_does_not_keep_stale_files_of_an_active_product(tmp_path):
+    from fdp_core.errors import ManifestError
+    cfg = make_product(tmp_path, name="zzz")
+    folder = tmp_path / "products" / "aaa"
+    folder.mkdir()
+    (folder / "product.toml").write_text(
+        'name = "aaa"\nstatus = "reserved"\nsql = ["a\\u0000b"]\n')
+    stale = tmp_path / "build" / "zzz"
+    stale.mkdir(parents=True)
+    (stale / "old.csv").write_text("old")
+    with pytest.raises(ManifestError, match=r"aaa/product\.toml"):
+        runner.run(cfg)
+    assert not stale.exists()

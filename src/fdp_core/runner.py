@@ -37,7 +37,11 @@ def _check_inside(manifest: Path, product: Product, rel: object, what: str) -> N
     if not isinstance(rel, str) or not rel:
         raise ManifestError(f"{manifest}: {what} must be a non-empty path")
     folder = product.path.resolve()
-    if not (folder / rel.replace("{engine}", "engine")).resolve().is_relative_to(folder):
+    try:
+        inside = (folder / rel.replace("{engine}", "engine")).resolve().is_relative_to(folder)
+    except (OSError, ValueError, RuntimeError) as exc:  # a NUL in the text, a symlink loop
+        raise ManifestError(f"{manifest}: {what} {rel!r}: {exc}") from exc
+    if not inside:
         raise ManifestError(f"{manifest}: {what} {rel!r} must stay inside the product folder")
 
 
