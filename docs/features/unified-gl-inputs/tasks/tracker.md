@@ -22,7 +22,7 @@
 | T12 | Document the aligned entry attributes and the synthetic-data notice in the product README | docs | maksym.shkilov@gmail.com | S | T7 | done | COMMIT |
 | T13 | End-to-end tests: five source differences, known values, traceability, exceptions report, exit codes | tests | maksym.shkilov@gmail.com | M | T11, T12, T4 | done | COMMIT |
 | T14 | Review F1: strict raw readability (line digits only, empty document, unreadable-line duplicates, independent format checks in control views) | domain | maksym.shkilov@gmail.com | M | T13 | done | COMMIT |
-| T15 | Review F2: translate on exact untrimmed text, keep original_description as written | domain | maksym.shkilov@gmail.com | S | T14 | todo | — |
+| T15 | Review F2: translate on exact untrimmed text, keep original_description as written | domain | maksym.shkilov@gmail.com | S | T14 | done | COMMIT |
 | T16 | Review F3: empty translation target counts as untranslated; invariant for a repeated translation row | domain | maksym.shkilov@gmail.com | S | T15 | todo | — |
 | T17 | Review F4: runner contract — stale files after exit 3, unknown status, file-named errors, manifest path validation | app | maksym.shkilov@gmail.com | M | T16 | todo | — |
 | T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | todo | — |

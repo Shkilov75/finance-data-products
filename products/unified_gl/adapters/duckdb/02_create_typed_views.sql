@@ -1,4 +1,5 @@
 -- Staged DDL (engine: duckdb). Typed views = the view contract of ADR-0001.
+-- The description is kept exactly as written (no trim): the translation matches the whole text.
 -- Contract: fixed names and types; a line is whole digits only (1.5 is unreadable, never rounded); a value that cannot be read in its source format is NULL, never guessed.
 -- ERP A date  DD.MM.YYYY (strict), number German "1.234,56"; at most 2 decimals, no sign.
 -- ERP B date  MM/DD/YYYY (strict), number US "-1,234.56"; at most 2 decimals, optional leading minus.
@@ -24,7 +25,7 @@ SELECT
                                                                    AS credit,
     nullif(trim(waehrung), '')                                     AS currency,
     nullif(trim(konto), '')                                        AS local_account,
-    coalesce(trim(buchungstext), '')                               AS description
+    coalesce(buchungstext, '')                                     AS description
 FROM raw.erp_a_export;
 
 CREATE OR REPLACE VIEW raw.typed_erp_b AS
@@ -42,7 +43,7 @@ SELECT
                                                                    AS amount,
     nullif(trim(d.currency), '')                                   AS currency,
     nullif(trim(d.l.account), '')                                  AS local_account,
-    coalesce(trim(d.l.memo), '')                                   AS description
+    coalesce(d.l.memo, '')                                         AS description
 FROM (
     SELECT doc_id, posting_date, currency, unnest(lines) AS l
     FROM raw.erp_b_export

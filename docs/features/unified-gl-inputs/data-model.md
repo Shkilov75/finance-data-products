@@ -199,7 +199,7 @@ Views are not stored data; they are the contract between the adapters and the ne
 | both | `line` | INTEGER | NULL unless the trimmed text is whole digits only (`1.5`, `+1`, `x` are unreadable, never rounded) |
 | both | `entry_date` | DATE | NULL when not exactly the source format or not a real date |
 | both | `currency`, `local_account` | VARCHAR | NULL when empty |
-| both | `description` | VARCHAR | trimmed, empty string when absent |
+| both | `description` | VARCHAR | exactly as written (not trimmed), empty string when absent |
 | `typed_erp_a` | `debit_filled`, `credit_filled` | BOOLEAN | the source cell is not empty. Needed so that «debit filled but unreadable» is not mistaken for «debit empty» (AC-09: both filled is unreadable) |
 | `typed_erp_a` | `debit`, `credit` | DECIMAL(18,2) | NULL when the cell is empty or not a non-negative number with at most 2 decimals in German format |
 | `typed_erp_b` | `amount` | DECIMAL(18,2) | NULL when not a number with at most 2 decimals in US format; sign is kept |

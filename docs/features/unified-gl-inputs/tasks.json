@@ -323,7 +323,7 @@
         "products/unified_gl/adapters/duckdb/02_create_typed_views.sql",
         "tests/unit/test_ledger_entry.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T16",

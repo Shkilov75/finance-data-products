@@ -106,9 +106,10 @@ def test_translation_needs_exact_whole_text(con, variant):
     con.execute("INSERT INTO raw.erp_a_export VALUES "
                 "('BA-1','1','06.01.2026','4710','10,00','','EUR',?)", [variant])
     build(con)
-    expected_text = "Office building rent" if variant.strip() == "Miete Bürogebäude" else variant.strip()
-    assert rows(con)[0][9] == expected_text
-    assert rows(con)[0][10] == variant.strip()
+    assert rows(con)[0][9] == variant          # not translated: whole text must be equal
+    assert rows(con)[0][10] == variant         # original_description is kept as the source wrote it
+    listed = con.execute((ROOT / "products/unified_gl/reports/exceptions_report.sql").read_text()).fetchall()
+    assert [r[3] for r in listed] == [variant]
 
 
 def test_exact_text_is_translated(con):
