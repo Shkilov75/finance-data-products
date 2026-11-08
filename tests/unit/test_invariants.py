@@ -231,3 +231,24 @@ def test_translation_rows_with_an_empty_source_system_still_name_the_description
     assert err.label == "unambiguous translation"
     assert [r[0] for r in err.rows] == [
         "? Miete appears 2 times in description_translation_synthetic.csv"]
+
+
+# --- review 2026-11-07 round 4, I1: a value made of spaces prints as ? too ---------------------
+
+def test_mapping_rows_with_a_space_only_source_system_still_name_the_account(cfg):
+    append(data(cfg, "account_mapping_synthetic.csv"), " ,4710,9999\n ,4710,9998\n")
+    err = expect_violation(cfg)
+    assert [r[0] for r in err.rows] == ["? 4710 appears 2 times in account_mapping_synthetic.csv"]
+
+
+def test_mapping_rows_with_a_space_only_account_still_name_the_source_system(cfg):
+    append(data(cfg, "account_mapping_synthetic.csv"), "ERP_A,  ,9999\nERP_A,  ,9998\n")
+    err = expect_violation(cfg)
+    assert [r[0] for r in err.rows] == ["ERP_A ? appears 2 times in account_mapping_synthetic.csv"]
+
+
+def test_translation_rows_with_a_space_only_source_system_still_name_the_description(cfg):
+    append(data(cfg, "description_translation_synthetic.csv"), " ,Miete,Rent\n ,Miete,Rent two\n")
+    err = expect_violation(cfg)
+    assert [r[0] for r in err.rows] == [
+        "? Miete appears 2 times in description_translation_synthetic.csv"]

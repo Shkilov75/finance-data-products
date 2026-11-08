@@ -1,7 +1,7 @@
 -- Invariant: each local account of a source system has exactly one row in the account mapping
--- (AC-11), whether the group accounts differ or repeat. An empty system or account is printed
--- as '?'. Zero rows = fine.
-SELECT coalesce(source_system, '?') || ' ' || coalesce(local_account, '?') || ' appears ' || CAST(count(*) AS STRING)
+-- (AC-11), whether the group accounts differ or repeat. An empty or space-only system or account
+-- is printed as '?'. Zero rows = fine.
+SELECT coalesce(nullif(trim(source_system), ''), '?') || ' ' || coalesce(nullif(trim(local_account), ''), '?') || ' appears ' || CAST(count(*) AS STRING)
        || ' times in account_mapping_synthetic.csv' AS offender
 FROM raw.account_mapping
 GROUP BY source_system, local_account

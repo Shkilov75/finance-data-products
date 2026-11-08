@@ -748,6 +748,128 @@
         "products/unified_gl/README.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "T38",
+      "title": "Review I1: space-only source system or local account prints as ? in invariants 02/03",
+      "layer": "domain",
+      "deps": [
+        "T37"
+      ],
+      "acs": [
+        "AC-11"
+      ],
+      "dod": "Invariant 02 and 03 messages print a value made of spaces as ?; original_description stays untrimmed.",
+      "files_hint": [
+        "products/unified_gl/invariants/02_unambiguous_mapping.sql",
+        "products/unified_gl/invariants/03_unambiguous_translation.sql",
+        "tests/unit/test_invariants.py"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "T39",
+      "title": "Review I2: export file names are unique ignoring case",
+      "layer": "app",
+      "deps": [
+        "T38"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02"
+      ],
+      "dod": "x.csv and X.csv in one manifest are a ManifestError.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T40",
+      "title": "Review I4: a path with a NUL or an unresolvable path is a named ManifestError",
+      "layer": "app",
+      "deps": [
+        "T39"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "NUL in a manifest path of a reserved product gives a ManifestError naming product.toml and cannot stop the clean start.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T41",
+      "title": "Review I5: product name equals its folder name",
+      "layer": "app",
+      "deps": [
+        "T40"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "A manifest whose name differs from its folder is a ManifestError, so clean start and exports always name the same build folder.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py",
+        "docs/features/unified-gl-inputs/contracts/cli.md"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T42",
+      "title": "Review I6: a failing export write removes the files already written",
+      "layer": "app",
+      "deps": [
+        "T41"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "If the second write_csv fails, no export of this run is left.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T43",
+      "title": "Review I7: drop the dead export-target check, test an unreadable manifest",
+      "layer": "app",
+      "deps": [
+        "T42"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "No dead defence code in runner; a manifest that cannot be opened is a ManifestError naming the file.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T44",
+      "title": "Review I3: data-model.md describes line_text as NULL when blank",
+      "layer": "docs",
+      "deps": [
+        "T43"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-08"
+      ],
+      "dod": "data-model.md line_text row says NULL when blank, printed as ?.",
+      "files_hint": [
+        "docs/features/unified-gl-inputs/data-model.md"
+      ],
+      "status": "todo"
     }
   ]
 }

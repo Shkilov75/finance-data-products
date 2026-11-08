@@ -45,5 +45,12 @@
 | T35 | Review H8: exports are written only after every summary and export query succeeded | app | maksym.shkilov@gmail.com | S | T34 | done | COMMIT |
 | T36 | Review H1: close the surviving test mutants of the F1-F3/G2 fixes | tests | maksym.shkilov@gmail.com | S | T35 | done | COMMIT |
 | T37 | Review H4: align cli.md, data-model.md, README and spec OQ-2 with the code | docs | maksym.shkilov@gmail.com | S | T36 | done | COMMIT |
+| T38 | Review I1: space-only source system or local account prints as ? in invariants 02/03 | domain | maksym.shkilov@gmail.com | S | T37 | done | COMMIT |
+| T39 | Review I2: export file names are unique ignoring case | app | maksym.shkilov@gmail.com | S | T38 | todo | SELECT |
+| T40 | Review I4: a path with a NUL or an unresolvable path is a named ManifestError | app | maksym.shkilov@gmail.com | S | T39 | todo | SELECT |
+| T41 | Review I5: product name equals its folder name | app | maksym.shkilov@gmail.com | S | T40 | todo | SELECT |
+| T42 | Review I6: a failing export write removes the files already written | app | maksym.shkilov@gmail.com | S | T41 | todo | SELECT |
+| T43 | Review I7: drop the dead export-target check, test an unreadable manifest | app | maksym.shkilov@gmail.com | S | T42 | todo | SELECT |
+| T44 | Review I3: data-model.md describes line_text as NULL when blank | docs | maksym.shkilov@gmail.com | S | T43 | todo | SELECT |
 
 **Total:** 13 tasks, ~10.5 person-days.
