@@ -39,7 +39,7 @@ def add_rows(cfg, *rows):
 
 
 @pytest.mark.parametrize("row, missing", [
-    ("BA-9;1.5;06.01.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line ?: missing in aligned entries"),
+    ("BA-9;1.5;06.01.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line 1.5: missing in aligned entries"),
     (";01;06.01.2026;4660;5,00;;EUR;x", "ERP_A ? line 1: missing in aligned entries"),
     ("BA-9;1;6.1.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line 1: missing in aligned entries"),
     ("BA-9;1;06.01.26;4660;5,00;;EUR;x", "ERP_A BA-9 line 1: missing in aligned entries"),
@@ -54,6 +54,14 @@ def test_unreadable_value_is_a_named_missing_entry_and_adds_no_raw_total(cfg, ro
     assert missing in messages
     assert not any("total: raw" in m for m in messages)
     assert all(m for m in messages)  # no blank message
+
+
+def test_two_unreadable_lines_of_one_document_are_told_apart(cfg):
+    add_rows(cfg, "BA-9;1.5;06.01.2026;4660;5,00;;EUR;a", "BA-9;+1;06.01.2026;4660;5,00;;EUR;b")
+    messages = [r[0] for r in runner.run(cfg).gates[0].violations]
+    assert "ERP_A BA-9 line 1.5: missing in aligned entries" in messages
+    assert "ERP_A BA-9 line +1: missing in aligned entries" in messages
+    assert not any("line ?" in m for m in messages)
 
 
 def test_duplicate_with_unreadable_line_stops_the_run(cfg):

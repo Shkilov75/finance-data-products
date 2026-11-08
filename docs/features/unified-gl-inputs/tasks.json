@@ -513,7 +513,7 @@
         "products/unified_gl/gates/01_completeness.sql",
         "tests/unit/test_raw_readability.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T26",

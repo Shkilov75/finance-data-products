@@ -7,13 +7,14 @@
 --   2. per entry matched by source system, document and line: missing in the aligned entries,
 --      present only in the aligned entries, or date / signed amount / local account differs
 --      (two entries that exchanged amounts leave the totals unchanged and are found here).
--- An unreadable raw entry counts as an entry and adds nothing to the totals, so it shows as missing.
+-- An unreadable raw entry counts as an entry and adds nothing to the totals, so it shows as missing;
+-- an unreadable line is printed as the source wrote it (line_text), never as a placeholder.
 WITH raw_entry AS (
-    SELECT source_system, document, line, coalesce(currency, 'UNKNOWN') AS currency,
+    SELECT source_system, document, line, line_text, coalesce(currency, 'UNKNOWN') AS currency,
            entry_date, local_account, signed_amount
     FROM raw.control_erp_a
     UNION ALL
-    SELECT source_system, document, line, coalesce(currency, 'UNKNOWN') AS currency,
+    SELECT source_system, document, line, line_text, coalesce(currency, 'UNKNOWN') AS currency,
            entry_date, local_account, signed_amount
     FROM raw.control_erp_b
 ),
@@ -62,7 +63,7 @@ findings AS (
     UNION ALL
     SELECT 2, r.source_system, coalesce(r.document, '?'), coalesce(r.line, -1),
            r.source_system || ' ' || coalesce(r.document, '?') || ' line '
-           || coalesce(CAST(r.line AS STRING), '?') || ': missing in aligned entries'
+           || coalesce(CAST(r.line AS STRING), r.line_text, '?') || ': missing in aligned entries'
     FROM raw_entry AS r
     LEFT JOIN aligned AS a
            ON a.source_system = r.source_system AND a.document = r.document AND a.line = r.line
