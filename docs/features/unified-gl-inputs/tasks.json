@@ -634,7 +634,7 @@
         "docs/features/unified-gl-inputs/migrations/03_create_control_views.up.sql",
         "tests/unit/test_raw_readability.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T32",

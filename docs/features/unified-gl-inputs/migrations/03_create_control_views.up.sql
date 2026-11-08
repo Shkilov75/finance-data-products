@@ -3,13 +3,13 @@
 -- signed_amount NULL when the entry is unreadable (date, key, currency, account or amount), so it counts as an entry but adds to no total.
 -- Independent expressions on purpose: a date is read by formatting the parsed date back to the
 -- source text, line and amount formats are full-match patterns written here, not shared with raw.typed_*.
--- line_text keeps the trimmed source text of the line so a duplicate with an unreadable line is still found.
+-- line_text keeps the trimmed source text of the line (NULL when blank) so a duplicate with an unreadable line is still found.
 
 CREATE OR REPLACE VIEW raw.control_erp_a AS
 WITH r AS (
     SELECT
         nullif(trim(belegnummer), '') AS document,
-        trim(zeile) AS line_text,
+        nullif(trim(zeile), '') AS line_text,
         CASE WHEN regexp_full_match(trim(zeile), '[0-9]+') THEN try_cast(trim(zeile) AS INTEGER) END AS line,
         CASE WHEN strftime(try_strptime(trim(buchungsdatum), '%d.%m.%Y'), '%d.%m.%Y') = trim(buchungsdatum)
              THEN try_cast(try_strptime(trim(buchungsdatum), '%d.%m.%Y') AS DATE) END AS entry_date,
@@ -40,7 +40,7 @@ CREATE OR REPLACE VIEW raw.control_erp_b AS
 WITH r AS (
     SELECT
         nullif(trim(d.doc_id), '') AS document,
-        trim(d.l.line_no) AS line_text,
+        nullif(trim(d.l.line_no), '') AS line_text,
         CASE WHEN regexp_full_match(trim(d.l.line_no), '[0-9]+') THEN try_cast(trim(d.l.line_no) AS INTEGER) END AS line,
         CASE WHEN strftime(try_strptime(trim(d.posting_date), '%m/%d/%Y'), '%m/%d/%Y') = trim(d.posting_date)
              THEN try_cast(try_strptime(trim(d.posting_date), '%m/%d/%Y') AS DATE) END AS entry_date,

@@ -58,6 +58,8 @@ def b_doc(doc_id="B9", line_no="1", currency="USD", amount="5.00"):
     ("BA-9;1;06.01.26;4660;5,00;;EUR;x", "ERP_A BA-9 line 1: missing in aligned entries"),
     ("BA-9;1;06.01.2026;4660;12.5;;EUR;x", "ERP_A BA-9 line 1: missing in aligned entries"),
     ("BA-9;1;06.01.2026;4660;1.23,45;;EUR;x", "ERP_A BA-9 line 1: missing in aligned entries"),
+    ("BA-9;  ;06.01.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line ?: missing in aligned entries"),
+    ("BA-9;;06.01.2026;4660;5,00;;EUR;x", "ERP_A BA-9 line ?: missing in aligned entries"),
 ])
 def test_unreadable_value_is_a_named_missing_entry_and_adds_no_raw_total(cfg, row, missing):
     add_rows(cfg, row)
@@ -125,3 +127,18 @@ def test_empty_currency_is_a_gate_finding_with_a_readable_message_not_an_engine_
     assert "ERP_A UNKNOWN entries: raw 1, aligned 0" in messages
     assert "ERP_A BA-9 line 1: missing in aligned entries" in messages
     assert all(m for m in messages)
+
+
+# --- review 2026-11-07 round 3, H3: a line of spaces reads like an empty line -----------------
+
+def test_two_rows_with_a_blank_line_number_stop_the_run_with_a_question_mark(cfg):
+    add_rows(cfg, "BA-9;  ;06.01.2026;4660;5,00;;EUR;a", "BA-9; ;06.01.2026;4660;5,00;;EUR;b")
+    with pytest.raises(InvariantViolation) as exc:
+        runner.run(cfg)
+    assert [r[0] for r in exc.value.rows] == ["ERP_A BA-9 line ? appears 2 times in the export"]
+
+
+def test_erp_b_blank_line_number_is_printed_as_a_question_mark(cfg):
+    add_b_documents(cfg, b_doc(line_no="  "))
+    messages = [r[0] for r in runner.run(cfg).gates[0].violations]
+    assert "ERP_B B9 line ?: missing in aligned entries" in messages
