@@ -406,7 +406,7 @@
         "docs/features/unified-gl-inputs/data-model.md",
         "tests/unit/test_gates.py"
       ],
-      "status": "todo"
+      "status": "done"
     },
     {
       "id": "T20",

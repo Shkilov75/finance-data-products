@@ -82,7 +82,7 @@ erDiagram
 
 ## Entities
 
-Types are written in the neutral vocabulary both engines accept (`VARCHAR`, `INTEGER`, `DECIMAL(18,2)`, `DATE`, `BOOLEAN`). `VARCHAR` carries no length: the spec gives no length limit (AC validation limits are all about dates and amounts) and Spark stores strings unbounded.
+Types in the neutral SQL (`staging.ledger_entry`, gates, invariants, reports) use the vocabulary both engines accept: `STRING`, `INTEGER`, `DECIMAL(18,2)`, `DATE`, `BOOLEAN`. Spark SQL rejects `VARCHAR` without a length, and the spec gives no length limit (AC validation limits are all about dates and amounts), so text is `STRING` (an alias of `VARCHAR` in DuckDB). The `raw` tables are created in the engine adapters, which may use the engine's own type name (`VARCHAR` in the DuckDB adapter); the tables below write `VARCHAR` for raw text columns.
 
 ### `raw.erp_a_export`
 
@@ -167,17 +167,17 @@ Created in neutral SQL (`products/unified_gl/sql/staging/`), one row per accepte
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
-| `entry_id` | VARCHAR | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06); `source_line` is hashed as an integer, so «01» and «1» give the same identifier, the document as written in the source with trimmed spaces |
-| `source_system` | VARCHAR | NOT NULL | `ERP_A` or `ERP_B` (US-04) |
-| `source_document` | VARCHAR | NOT NULL | original document number (US-04) |
+| `entry_id` | STRING | NOT NULL, unique (invariant) | `md5(source_system \|\| '\|' \|\| source_document \|\| '\|' \|\| source_line)`, 32 hex characters, deterministic (AC-06); `source_line` is hashed as an integer, so «01» and «1» give the same identifier, the document as written in the source with trimmed spaces |
+| `source_system` | STRING | NOT NULL | `ERP_A` or `ERP_B` (US-04) |
+| `source_document` | STRING | NOT NULL | original document number (US-04) |
 | `source_line` | INTEGER | NOT NULL | original line number (US-04) |
 | `entry_date` | DATE | NOT NULL | real calendar date (AC-02) |
 | `signed_amount` | DECIMAL(18,2) | NOT NULL, ≠ 0 | debit positive, credit negative; scale 2, never rounded (spec §6) |
-| `transaction_currency` | VARCHAR | NOT NULL | EUR, GBP or USD in the data; the run summary lists the currencies found here (AC-14) |
-| `local_account` | VARCHAR | NOT NULL | account in the source's own chart |
-| `group_account` | VARCHAR | NULL allowed | NULL = no mapping row; the mapping gate fails on it (AC-10) |
-| `description` | VARCHAR | NOT NULL | common language; the original text when no translation exists (AC-02) |
-| `original_description` | VARCHAR | NOT NULL | the source's text; needed by the exceptions report, which cannot tell «untranslated» from «translated» using `description` alone |
+| `transaction_currency` | STRING | NOT NULL | EUR, GBP or USD in the data; the run summary lists the currencies found here (AC-14) |
+| `local_account` | STRING | NOT NULL | account in the source's own chart |
+| `group_account` | STRING | NULL allowed | NULL = no mapping row; the mapping gate fails on it (AC-10) |
+| `description` | STRING | NOT NULL | common language; the original text when no translation exists (AC-02) |
+| `original_description` | STRING | NOT NULL | the source's text; needed by the exceptions report, which cannot tell «untranslated» from «translated» using `description` alone |
 
 **Aggregate root:** root (no children).
 **Access patterns:** see «Access paths» below.
