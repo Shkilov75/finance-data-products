@@ -73,6 +73,46 @@ def test_erp_a_unreadable_rule_keeps_row_with_null_amount(con, kwargs):
 
 
 @pytest.mark.parametrize("kwargs", [
+    {"line": "1.5"},                               # fractional line must not be rounded to 2
+    {"line": "+1"},
+    {"date": "6.1.2026"},                          # not DD.MM.YYYY
+    {"date": "06.01.26"},                          # two-digit year
+    {"debit": "12.5"},                             # not a German number (read as 125 otherwise)
+    {"debit": "1.23,45"},                          # wrong thousands grouping
+    {"debit": "1e3"},
+    {"debit": "+5,00"},
+])
+def test_erp_a_format_the_typed_view_rejects_is_unreadable_here_too(con, kwargs):
+    assert a_row(con, **kwargs) == (1, None)
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"date": "1/6/2026"},
+    {"date": "01/06/26"},
+    {"amount": "+5.00"},
+    {"amount": "1e3"},
+    {"amount": "1,23.45"},
+    {"amount": "12,5"},
+])
+def test_erp_b_format_the_typed_view_rejects_is_unreadable_here_too(con, kwargs):
+    assert b_row(con, **kwargs) == (1, None)
+
+
+def test_erp_b_fractional_line_is_unreadable(con):
+    b_row(con)
+    con.execute("DELETE FROM raw.erp_b_export")
+    con.execute("INSERT INTO raw.erp_b_export VALUES ('B1','01/06/2026','USD',"
+                "[{'line_no':'1.6','account':'4710','amount':'10.00','memo':'Rent'}])")
+    assert con.execute("SELECT line, signed_amount FROM raw.control_erp_b").fetchone() == (None, None)
+    assert con.execute("SELECT line FROM raw.typed_erp_b").fetchone() == (None,)
+
+
+def test_erp_a_fractional_line_is_unreadable_in_the_typed_view(con):
+    a_row(con, line="1.5")
+    assert con.execute("SELECT line FROM raw.typed_erp_a").fetchone() == (None,)
+
+
+@pytest.mark.parametrize("kwargs", [
     {"date": "13/45/2026"},
     {"amount": "0.00"},
     {"amount": "0"},

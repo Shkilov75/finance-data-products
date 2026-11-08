@@ -196,7 +196,7 @@ Views are not stored data; they are the contract between the adapters and the ne
 |---|---|---|---|
 | both | `source_system` | VARCHAR | constant `ERP_A` / `ERP_B` |
 | both | `document` | VARCHAR | trimmed |
-| both | `line` | INTEGER | NULL when not an integer |
+| both | `line` | INTEGER | NULL unless the trimmed text is whole digits only (`1.5`, `+1`, `x` are unreadable, never rounded) |
 | both | `entry_date` | DATE | NULL when not exactly the source format or not a real date |
 | both | `currency`, `local_account` | VARCHAR | NULL when empty |
 | both | `description` | VARCHAR | trimmed, empty string when absent |
@@ -212,7 +212,8 @@ One row per **raw** entry, unreadable ones included. Parsing is written separate
 
 | Column | Type | Notes |
 |---|---|---|
-| `source_system`, `document`, `line`, `currency`, `local_account` | VARCHAR / INTEGER | as in the typed views |
+| `source_system`, `document`, `line`, `currency`, `local_account` | VARCHAR / INTEGER | as in the typed views; `document` is NULL when empty |
+| `line_text` | VARCHAR | trimmed source text of the line, so the invariant «unique document and line» can also find a duplicate whose line is unreadable |
 | `entry_date` | DATE | NULL when unreadable |
 | `signed_amount` | DECIMAL(18,2) | NULL when the entry is unreadable for any reason (date, key, currency, account, amount, both/neither side filled, negative or zero or over-precise amount), so an unreadable entry counts as an entry and adds nothing to the debit and credit totals (AC-09) |
 

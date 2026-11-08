@@ -60,8 +60,8 @@ findings AS (
            || ', aligned ' || CAST(aligned_credit AS VARCHAR)
     FROM total_diff WHERE raw_credit <> aligned_credit
     UNION ALL
-    SELECT 2, r.source_system, r.document, coalesce(r.line, -1),
-           r.source_system || ' ' || r.document || ' line '
+    SELECT 2, r.source_system, coalesce(r.document, '?'), coalesce(r.line, -1),
+           r.source_system || ' ' || coalesce(r.document, '?') || ' line '
            || coalesce(CAST(r.line AS VARCHAR), '?') || ': missing in aligned entries'
     FROM raw_entry AS r
     LEFT JOIN aligned AS a
