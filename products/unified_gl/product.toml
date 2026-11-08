@@ -11,13 +11,14 @@ sql = [
 ]
 
 # Zero-row checks run before the gates; a returned row stops the run (exit 2).
-# Order matters: a repeated mapping or translation row fans out the staging join and would
-# otherwise be reported as a repeated entry_id, so those checks run before the entry-id check.
+# Order matters, and the file numbers follow it: a repeated mapping or translation row fans out
+# the staging join and would otherwise be reported as a repeated entry_id, so those checks run
+# before the entry-id check.
 invariants = [
   "invariants/01_unique_document_and_line.sql",
   "invariants/02_unambiguous_mapping.sql",
-  "invariants/04_unambiguous_translation.sql",
-  "invariants/03_unique_entry_id.sql",
+  "invariants/03_unambiguous_translation.sql",
+  "invariants/04_unique_entry_id.sql",
 ]
 
 # Zero rows = PASS; a failed gate does not stop the run (exit 1).

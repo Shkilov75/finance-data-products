@@ -19,8 +19,8 @@ sql = [
 invariants = [
   "invariants/01_unique_document_and_line.sql",
   "invariants/02_unambiguous_mapping.sql",
-  "invariants/04_unambiguous_translation.sql",
-  "invariants/03_unique_entry_id.sql",
+  "invariants/03_unambiguous_translation.sql",
+  "invariants/04_unique_entry_id.sql",
 ]
 gates = []
 """
@@ -118,7 +118,7 @@ def test_repeated_entry_id_names_each_entry(cfg):
                 "entry_date, signed_amount, transaction_currency, local_account, group_account, "
                 "description, original_description FROM staging.ledger_entry "
                 "WHERE source_system = 'ERP_B' LIMIT 1")
-    rows = con.execute((cfg.root / "products/unified_gl/invariants/03_unique_entry_id.sql")
+    rows = con.execute((cfg.root / "products/unified_gl/invariants/04_unique_entry_id.sql")
                        .read_text()).fetchall()
     con.close()
     assert len(rows) == 2
@@ -173,10 +173,11 @@ def test_real_manifest_runs_all_invariants_in_the_order_that_matters():
     names = [i.rsplit("/", 1)[-1] for i in product.invariants]
     assert names[0] == "01_unique_document_and_line.sql"
     assert set(names) == {"01_unique_document_and_line.sql", "02_unambiguous_mapping.sql",
-                          "04_unambiguous_translation.sql", "03_unique_entry_id.sql"}
+                          "03_unambiguous_translation.sql", "04_unique_entry_id.sql"}
+    assert names == sorted(names)   # file numbers follow the execution order
     # a repeated mapping or translation row fans out the join and must be caught before entry ids
-    assert names.index("02_unambiguous_mapping.sql") < names.index("03_unique_entry_id.sql")
-    assert names.index("04_unambiguous_translation.sql") < names.index("03_unique_entry_id.sql")
+    assert names.index("02_unambiguous_mapping.sql") < names.index("04_unique_entry_id.sql")
+    assert names.index("03_unambiguous_translation.sql") < names.index("04_unique_entry_id.sql")
 
 
 def test_real_manifest_stops_on_a_repeated_mapping_row(real_cfg):
