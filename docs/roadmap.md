@@ -91,4 +91,4 @@ Zones are marked `(new)` because the repo has no code yet; they come from the ta
 
 | Step | Shipped | Link |
 |---|---|---|
-| 2 · Unified GL, inputs | 2026-11-08 | [changelog](features/unified-gl-inputs/changelog.md) (PR link follows once opened) |
+| 2 · Unified GL, inputs | 2026-11-08 | [changelog](features/unified-gl-inputs/changelog.md) · [PR #1](https://github.com/Shkilov75/finance-data-products/pull/1) |
