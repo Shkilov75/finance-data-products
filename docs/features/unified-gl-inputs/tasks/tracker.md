@@ -28,5 +28,14 @@
 | T18 | Review F5 a-c: AC-06 equal-attribute pair, real-manifest test, stronger weak tests | tests | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T19 | Review F6: STRING instead of bare VARCHAR in neutral SQL | domain | maksym.shkilov@gmail.com | S | T16 | done | COMMIT |
 | T20 | Review F7: remove unused down scripts and 'Staged DDL' headers from products/ | docs | maksym.shkilov@gmail.com | S | T19 | done | COMMIT |
+| T21 | Review G1: export file must be a non-empty bare name; clean start removes a file or symlink in place of build/<product> | app | maksym.shkilov@gmail.com | S | T20 | todo | — |
+| T22 | Review G6: clean start leaves build folders of reserved products alone | app | maksym.shkilov@gmail.com | S | T21 | todo | — |
+| T23 | Review G7: manifest errors name the file; list types validated; SQL paths confined to the product folder | app | maksym.shkilov@gmail.com | S | T22 | todo | — |
+| T24 | Review G3: blank translation target counts as untranslated | domain | maksym.shkilov@gmail.com | S | T20 | todo | — |
+| T25 | Review G4: completeness gate prints an unreadable line as written | domain | maksym.shkilov@gmail.com | S | T24 | todo | — |
+| T26 | Review G5: invariant messages survive an empty key | domain | maksym.shkilov@gmail.com | S | T25 | todo | — |
+| T27 | Review G9: invariant file numbers follow the execution order | domain | maksym.shkilov@gmail.com | S | T26 | todo | — |
+| T28 | Review G2: ERP B and credit-side test coverage for the F1-F3 fixes | tests | maksym.shkilov@gmail.com | M | T27, T23 | todo | — |
+| T29 | Review G8: update README, cli.md, data-model.md and sad.md for the fourth invariant and STRING | docs | maksym.shkilov@gmail.com | S | T28 | todo | — |
 
 **Total:** 13 tasks, ~10.5 person-days.

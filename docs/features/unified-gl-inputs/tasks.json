@@ -348,7 +348,7 @@
     },
     {
       "id": "T17",
-      "title": "Review F4: runner contract \u2014 stale files after exit 3, unknown status, file-named errors, manifest path validation",
+      "title": "Review F4: runner contract — stale files after exit 3, unknown status, file-named errors, manifest path validation",
       "layer": "app",
       "deps": [
         "T16"
@@ -427,6 +427,175 @@
         "tests/unit/test_ledger_entry.py"
       ],
       "status": "done"
+    },
+    {
+      "id": "T21",
+      "title": "Review G1: export file must be a non-empty bare name; clean start removes a file or symlink in place of build/<product>",
+      "layer": "app",
+      "deps": [
+        "T20"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "Empty, '.', nested or absolute export file is a manifest error at parse time; a file or symlink at build/<product> is removed and never becomes an export root.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T22",
+      "title": "Review G6: clean start leaves build folders of reserved products alone",
+      "layer": "app",
+      "deps": [
+        "T21"
+      ],
+      "acs": [
+        "AC-13"
+      ],
+      "dod": "A run does not delete build/<product> of a product whose manifest says reserved; active and unparseable products are still cleaned.",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T23",
+      "title": "Review G7: manifest errors name the file; list types validated; SQL paths confined to the product folder",
+      "layer": "app",
+      "deps": [
+        "T22"
+      ],
+      "acs": [
+        "AC-12"
+      ],
+      "dod": "Malformed TOML names the file; non-list sql/gates/invariants and any sql/invariants/gates/summary/export-query path outside the product folder are manifest errors (exit 3).",
+      "files_hint": [
+        "src/fdp_core/runner.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T24",
+      "title": "Review G3: blank translation target counts as untranslated",
+      "layer": "domain",
+      "deps": [
+        "T20"
+      ],
+      "acs": [
+        "AC-02"
+      ],
+      "dod": "A translation target of only spaces is untranslated in staging and listed in the exceptions report.",
+      "files_hint": [
+        "products/unified_gl/sql/staging/04_create_staging_ledger_entry.sql",
+        "products/unified_gl/reports/exceptions_report.sql",
+        "tests/unit/test_ledger_entry.py",
+        "tests/unit/test_reports_sql.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T25",
+      "title": "Review G4: completeness gate prints an unreadable line as written",
+      "layer": "domain",
+      "deps": [
+        "T24"
+      ],
+      "acs": [
+        "AC-08"
+      ],
+      "dod": "A missing entry with an unreadable line is reported with the line text from the source, not '?'.",
+      "files_hint": [
+        "products/unified_gl/gates/01_completeness.sql",
+        "tests/unit/test_raw_readability.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T26",
+      "title": "Review G5: invariant messages survive an empty key",
+      "layer": "domain",
+      "deps": [
+        "T25"
+      ],
+      "acs": [
+        "AC-11"
+      ],
+      "dod": "Two mapping rows with an empty local account or two translation rows with an empty description print a readable offender line.",
+      "files_hint": [
+        "products/unified_gl/invariants/02_unambiguous_mapping.sql",
+        "products/unified_gl/invariants/04_unambiguous_translation.sql",
+        "tests/unit/test_invariants.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T27",
+      "title": "Review G9: invariant file numbers follow the execution order",
+      "layer": "domain",
+      "deps": [
+        "T26"
+      ],
+      "acs": [
+        "AC-06"
+      ],
+      "dod": "Files are numbered in the order the manifest runs them; labels and output are unchanged.",
+      "files_hint": [
+        "products/unified_gl/invariants",
+        "products/unified_gl/product.toml",
+        "tests/unit/test_invariants.py",
+        "tests/unit/test_runner_phases.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T28",
+      "title": "Review G2: ERP B and credit-side test coverage for the F1-F3 fixes",
+      "layer": "tests",
+      "deps": [
+        "T27",
+        "T23"
+      ],
+      "acs": [
+        "AC-02",
+        "AC-06",
+        "AC-08",
+        "AC-09"
+      ],
+      "dod": "Reverting any of the eight surviving mutants (ERP B empty doc_id, memo trim, credit format, ERP B date regex, empty-target description, ERP B line_text, UNKNOWN currency, currency IS NOT NULL) turns a test red.",
+      "files_hint": [
+        "tests/unit/test_control_views.py",
+        "tests/unit/test_raw_readability.py",
+        "tests/unit/test_ledger_entry.py",
+        "tests/unit/test_reports_sql.py",
+        "tests/unit/test_gates.py"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "T29",
+      "title": "Review G8: update README, cli.md, data-model.md and sad.md for the fourth invariant and STRING",
+      "layer": "docs",
+      "deps": [
+        "T28"
+      ],
+      "acs": [
+        "AC-06",
+        "AC-14"
+      ],
+      "dod": "Docs name four invariants incl. unambiguous translation and STRING types; a test checks every manifest invariant label appears in the README.",
+      "files_hint": [
+        "products/unified_gl/README.md",
+        "docs/features/unified-gl-inputs/contracts/cli.md",
+        "docs/features/unified-gl-inputs/data-model.md",
+        "docs/features/unified-gl-inputs/sad.md",
+        "tests/unit/test_readme.py"
+      ],
+      "status": "todo"
     }
   ]
 }
