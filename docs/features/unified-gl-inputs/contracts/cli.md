@@ -122,6 +122,7 @@ reserved: functional_model
 | Exit | First line | Names |
 |---|---|---|
 | 2, repeated key | `invariant violation: unique document and line` | one line per offender: source system, document, line (AC-06) |
+| 2, ambiguous translation | `invariant violation: unambiguous translation` | source system and original description of a translation row that appears more than once (AC-02, AC-06); runs before the entry-id check, so it is never reported as a repeated entry id |
 | 2, repeated entry id | `invariant violation: unique entry id` | source system, document, line of each entry sharing the id (AC-06) |
 | 2, ambiguous mapping | `invariant violation: unambiguous mapping` | source system and local account (AC-11), whether the group accounts differ or repeat |
 | 3 | `error: <message>` | file and cause, e.g. `unified_gl/sql/staging/04_create_staging_ledger_entry.sql: ...` |
@@ -145,9 +146,10 @@ After exit 2 or exit 3 no report file exists: neither `build/report.json` nor `b
 | Local account without a mapping row | 1 (mapping gate) | AC-10 | 2, 5 |
 | Description without translation | 0 (entry stays; one record in the exceptions report) | AC-02 | 4, 5 |
 | Same source system, document and line twice in one export (checked on raw records) | 2 | AC-06 | 1, 7 |
+| Same original description twice in the translation list | 2 | AC-02, AC-06 | 1 |
 | Same `entry_id` twice | 2 | AC-06 | 1, 7 |
 | Same local account twice in the mapping (same or different group account) | 2 | AC-11 | 1 |
-| Layer SQL file fails, manifest key missing | 3 | SAD §8 | 1 |
+| Layer SQL file fails, manifest key missing or malformed (the message names `product.toml`), a path that leaves the product folder, an export `file` that is not a plain file name | 3 | SAD §8, AC-12 | 1 |
 
 ### 3.6 Idempotency
 
@@ -187,7 +189,9 @@ Only the generator writes the input files; a product run opens them read-only (A
 | `invariants` | list of paths | zero-row checks; a returned row → exit 2 |
 | `gates` | list of paths | `01_completeness.sql`, `02_mapping.sql`; zero rows = PASS |
 | `summary` | path | one query printed as the summary table |
-| `exports` | list of `{query, file}` | each query written by the core as CSV into `build/<product>/` |
+| `exports` | list of `{query, file}` | each query written by the core as CSV into `build/<product>/`; `file` is a plain file name (letters, digits, `_`, `.`, `-`), never a path |
+
+Every path in `sql`, `invariants`, `gates`, `summary` and `exports[].query` stays inside the product's own folder (products never share SQL); `sql`, `gates` and `invariants` are lists of strings. A violation is a manifest error: exit 3, the message names the `product.toml`. The clean start (§3.1 phase 1) removes `build/<product>/` of every product except one whose manifest says `reserved`; a file or symlink in its place is removed, never followed.
 
 ## 7. Data contract — the aligned entry set
 

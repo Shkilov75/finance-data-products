@@ -1,7 +1,7 @@
 # unified_gl
 
 Two ERP exports in different formats become one aligned set of ledger entries, checked by two
-gates and three invariant checks. This step ends with the aligned entries; USD conversion is the
+gates and four invariant checks. This step ends with the aligned entries; USD conversion is the
 next roadmap step.
 
 > **All data here is synthetic.** Every input file below, and every name and amount in it, is
@@ -47,17 +47,17 @@ command line client: `duckdb build/fdp.duckdb "SELECT * FROM staging.ledger_entr
 
 | Attribute | Type | Meaning | Empty allowed |
 |---|---|---|---|
-| `entry_id` | VARCHAR | Stable identifier: `md5` of source system, document and line joined with `\|`; the line counts as a whole number, so `01` and `1` give the same id | no |
-| `source_system` | VARCHAR | `ERP_A` or `ERP_B`: which export the entry came from | no |
-| `source_document` | VARCHAR | Document number as written in the source (spaces trimmed) | no |
+| `entry_id` | STRING | Stable identifier: `md5` of source system, document and line joined with `\|`; the line counts as a whole number, so `01` and `1` give the same id | no |
+| `source_system` | STRING | `ERP_A` or `ERP_B`: which export the entry came from | no |
+| `source_document` | STRING | Document number as written in the source (spaces trimmed) | no |
 | `source_line` | INTEGER | Line number within the document | no |
 | `entry_date` | DATE | The posting date as a real calendar date | no |
 | `signed_amount` | DECIMAL(18,2) | One amount for both sources: debit positive, credit negative, never zero, two decimals, never rounded | no |
-| `transaction_currency` | VARCHAR | Currency of the document (EUR, GBP or USD in the data); the run summary lists exactly the currencies found here | no |
-| `local_account` | VARCHAR | Account in the source's own chart of accounts | no |
-| `group_account` | VARCHAR | Account of the common chart that the local account maps to | yes: empty means no mapping row, and the mapping gate fails |
-| `description` | VARCHAR | Description in English; the original text when the translation list has no exact match | no |
-| `original_description` | VARCHAR | Description exactly as the source wrote it (needed by the exceptions report) | no |
+| `transaction_currency` | STRING | Currency of the document (EUR, GBP or USD in the data); the run summary lists exactly the currencies found here | no |
+| `local_account` | STRING | Account in the source's own chart of accounts | no |
+| `group_account` | STRING | Account of the common chart that the local account maps to | yes: empty means no mapping row, and the mapping gate fails |
+| `description` | STRING | Description in English; the original text when the translation list has no exact match | no |
+| `original_description` | STRING | Description exactly as the source wrote it (needed by the exceptions report) | no |
 
 ### Trace an entry back to its raw record
 
@@ -70,11 +70,18 @@ Raw data is kept as it arrived. Find the record by `source_system`, `source_docu
 
 | Kind | What it does | Result |
 |---|---|---|
-| Invariant check (`invariants/`) | Stops the run when a key is broken: a document and line repeated in one export, an ambiguous account mapping, or a repeated `entry_id`. Names the source system, document and line (or local account) | Error, exit code 2 |
+| Invariant check (`invariants/`) | Stops the run when a key is broken: a document and line repeated in one export, an ambiguous account mapping, an ambiguous translation row (the same original description twice), or a repeated `entry_id`. They run in that order, so a repeated mapping or translation row is reported as itself and not as a repeated `entry_id`. Names the source system, document and line (or local account, or description) | Error, exit code 2 |
 | Gate (`gates/`) | `01_completeness.sql` compares the raw side with the aligned entries (counts and debit and credit totals per source system and currency, and every single entry); `02_mapping.sql` lists entries without a group account | A failed gate is a result: the run goes on and ends with exit code 1 |
 | Exceptions report | One record per aligned entry whose description has no translation (exact whole-text match), kept with its original text | `build/unified_gl/exceptions_report.csv`, always written, header only when empty |
 
 Every check is one SQL file; zero returned rows means the check passes.
+
+The four invariant checks, in the order they run (the order matters, see above):
+
+1. `unique document and line`
+2. `unambiguous mapping`
+3. `unambiguous translation`
+4. `unique entry id`
 
 ### Exit codes of `fdp run`
 

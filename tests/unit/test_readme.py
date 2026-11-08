@@ -67,3 +67,19 @@ def test_readme_lists_the_five_source_differences():
 def test_markdown_links_resolve():
     for target in re.findall(r"\]\((?!https?://|#)([^)#]+)", text()):
         assert (README.parent / target).exists(), target
+
+
+def test_readme_names_every_invariant_check_of_the_manifest():
+    from fdp_core.errors import InvariantViolation
+    product = next(p for p in runner.discover_products(Config(root=ROOT)) if p.name == "unified_gl")
+    labels = [InvariantViolation(rel, []).label for rel in product.invariants]
+    assert len(labels) == 4
+    for label in labels:
+        assert label in text().lower(), label
+    assert "four invariant" in text().lower()
+
+
+def test_readme_attribute_types_are_the_neutral_ones_of_the_ddl():
+    section = text().split("## Aligned entries", 1)[1].split("\n## ", 1)[0]
+    assert "VARCHAR" not in section
+    assert "STRING" in section

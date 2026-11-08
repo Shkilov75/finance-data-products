@@ -144,7 +144,7 @@ File: `products/unified_gl/data/description_translation_synthetic.csv`.
 
 **Aggregate root:** root.
 **Access patterns:** lookup by `(source_system, original_description)` → alignment join and the exceptions report.
-**Constraints:** `(source_system, original_description)` unique by construction of the generator (a duplicate would multiply entries and be caught by the invariant «unique entry id»).
+**Constraints:** `(source_system, original_description)` unique by construction of the generator (a duplicate would multiply entries; the invariant «unambiguous translation» stops the run first and names the repeated description, so it is never reported as a repeated entry id).
 **Design note:** ERP B is already in English, so the generator writes identity rows (`original = common`) for its descriptions. This keeps the neutral SQL uniform: one left join for both systems, and «no translation row» always means «exceptions report», without a per-system language rule.
 
 ### `raw.exchange_rate`
