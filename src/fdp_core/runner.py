@@ -144,8 +144,18 @@ def build_layers(cfg: Config, products: list[Product] | None = None) -> duckdb.D
     return con
 
 
+def _resolve(cfg: Config, product: Product, rel: str) -> Path:
+    """The file a manifest path names for the real engine, checked again after {engine} is filled in
+    (a symlinked engine folder must not lead out of the product)."""
+    path = product.path / rel.replace("{engine}", cfg.engine)
+    if not path.resolve().is_relative_to(product.path.resolve()):
+        raise ManifestError(
+            f"{product.path / 'product.toml'}: {rel!r} must stay inside the product folder")
+    return path
+
+
 def _read(cfg: Config, product: Product, rel: str) -> str:
-    return (product.path / rel.replace("{engine}", cfg.engine)).read_text()
+    return _resolve(cfg, product, rel).read_text()
 
 
 @dataclass
@@ -206,8 +216,7 @@ def _run(cfg: Config) -> RunResult:
                     raise InvariantViolation(f"{product.name}/{rel}", rows)
             for rel in product.gates:
                 with _in_file(product, rel):
-                    result.gates.append(
-                        run_sql_gate(con, product.path / rel.replace("{engine}", cfg.engine)))
+                    result.gates.append(run_sql_gate(con, _resolve(cfg, product, rel)))
             if product.gates:
                 result.gated_products.append(product.name)
         for product in active:  # phase 5: summary and exports

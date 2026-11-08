@@ -330,3 +330,25 @@ def test_two_exports_with_the_same_file_name_are_a_manifest_error(tmp_path):
     with pytest.raises(ManifestError, match=r"demo/product\.toml.*x\.csv.*twice"):
         runner.run(cfg)
     assert not cfg.db_path.exists()
+
+
+# --- review 2026-11-07 round 3, H5: {engine} paths are checked with the real engine name -----
+
+@pytest.mark.parametrize("kind", ["sql", "gates"])
+def test_symlinked_engine_folder_pointing_outside_the_product_is_a_manifest_error(tmp_path, kind):
+    from fdp_core.errors import ManifestError
+    other = tmp_path / "products/other/adapters"
+    other.mkdir(parents=True)
+    (other / "x.sql").write_text("CREATE TABLE staging.leaked AS SELECT 1 AS x;")
+    cfg = make_product(tmp_path, sql=["sql/a.sql"] if kind == "gates" else ["adapters/{engine}/x.sql"],
+                       gates=["adapters/{engine}/x.sql"] if kind == "gates" else [])
+    import shutil
+    shutil.rmtree(tmp_path / "products/demo/adapters/duckdb")   # make_product put a real folder here
+    (tmp_path / "products/demo/adapters/duckdb").symlink_to(other, target_is_directory=True)
+    with pytest.raises(ManifestError, match=r"demo/product\.toml.*inside the product folder"):
+        runner.run(cfg)
+    import duckdb
+    con = duckdb.connect(str(cfg.db_path), read_only=True)
+    tables = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
+    con.close()
+    assert "leaked" not in tables
